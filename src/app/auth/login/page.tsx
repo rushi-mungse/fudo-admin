@@ -21,11 +21,13 @@ import { CiMail } from "react-icons/ci";
 import { RiLockPasswordLine } from "react-icons/ri";
 import { FcGoogle } from "react-icons/fc";
 import { useAuthStore } from "@/lib/store";
+import { useRouter } from "next/navigation";
 
 const LoginPage = () => {
   const [form] = useForm();
   const [context, contextHolder] = message.useMessage();
   const setAuth = useAuthStore((state) => state.setAuth);
+  const router = useRouter();
 
   const handleOnSuccess = (data: ILoginResponseData) => {
     form.resetFields();
@@ -35,6 +37,7 @@ const LoginPage = () => {
       duration: 2,
     });
     setAuth(data.user);
+    router.push("/dashboard");
   };
 
   const handleOnError = (err: AxiosError) => {
