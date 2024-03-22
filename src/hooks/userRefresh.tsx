@@ -11,7 +11,8 @@ const useRefreshHook = () => {
     queryFn: self,
     retry: false,
   });
-  setAuth(data?.data.user);
+
+  if (data?.data?.user) setAuth(data.data.user);
   return { isError, isLoading };
 };
 
