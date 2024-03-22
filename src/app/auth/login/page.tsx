@@ -81,7 +81,6 @@ const LoginPage = () => {
                 form={form}
                 className="flex items-center flex-col"
                 onFinish={(data) => {
-                  console.log(data);
                   mutate(data);
                 }}
               >
