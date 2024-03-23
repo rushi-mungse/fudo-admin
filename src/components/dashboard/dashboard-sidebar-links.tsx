@@ -1,6 +1,6 @@
 "use client";
 
-import { Menu } from "antd";
+import { Menu, message } from "antd";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
@@ -15,11 +15,23 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import { logout } from "@/api/auth";
 import { useAuthStore } from "@/lib/store";
+import { AxiosError } from "axios";
+import { ErrorType } from "@/types";
 
 const DashboardSidebarLinks = () => {
   const pathname = usePathname();
   const router = useRouter();
   const clearAuth = useAuthStore((state) => state.clearAuth);
+  const [context, contextHolder] = message.useMessage();
+
+  const handleOnError = (err: AxiosError) => {
+    const errors = err.response?.data as unknown as ErrorType;
+    context.open({
+      type: "error",
+      content: errors.error[0].msg,
+      duration: 2,
+    });
+  };
 
   const { mutate } = useMutation({
     mutationFn: async () => await logout(),
@@ -27,10 +39,12 @@ const DashboardSidebarLinks = () => {
       clearAuth();
       return router.push("/auth/login");
     },
+    onError: (err: AxiosError) => handleOnError(err),
   });
 
   return (
     <div className="flex justify-between flex-col h-[calc(100vh_-80px)]">
+      {contextHolder}
       <Menu
         mode="inline"
         defaultSelectedKeys={[pathname]}
