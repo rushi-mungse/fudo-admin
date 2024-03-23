@@ -1,5 +1,9 @@
 "use client";
 
+import { Menu } from "antd";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+
 import {
   BarChartOutlined,
   FileTextOutlined,
@@ -8,25 +12,28 @@ import {
   SnippetsOutlined,
   LogoutOutlined,
 } from "@ant-design/icons";
-import { Button, Menu } from "antd";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { logout } from "@/api/auth";
+import { useAuthStore } from "@/lib/store";
 
 const DashboardSidebarLinks = () => {
-  const [currentPage, setCurrentPage] = useState<string>("");
   const pathname = usePathname();
-  console.log(pathname);
+  const router = useRouter();
+  const clearAuth = useAuthStore((state) => state.clearAuth);
 
-  useEffect(() => {
-    setCurrentPage(pathname);
-  }, [pathname]);
+  const { mutate } = useMutation({
+    mutationFn: async () => await logout(),
+    onSuccess: async () => {
+      clearAuth();
+      return router.push("/auth/login");
+    },
+  });
 
   return (
     <div className="flex justify-between flex-col h-[calc(100vh_-80px)]">
       <Menu
         mode="inline"
-        defaultSelectedKeys={[currentPage]}
+        defaultSelectedKeys={[pathname]}
         items={[
           {
             key: "/dashboard/summary",
@@ -56,9 +63,17 @@ const DashboardSidebarLinks = () => {
         ]}
       />
 
-      <Button icon={<LogoutOutlined />} onClick={() => {}}>
-        Logout
-      </Button>
+      <Menu
+        mode="inline"
+        defaultSelectedKeys={[pathname]}
+        items={[
+          {
+            key: "logout",
+            icon: <LogoutOutlined />,
+            label: <button onClick={() => mutate()}>Logout</button>,
+          },
+        ]}
+      />
     </div>
   );
 };
