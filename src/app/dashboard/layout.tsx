@@ -12,7 +12,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       <Layout>
         <DashboardMainHeader />
         <DashboardMobileHeader />
-        <div className="h-full rounded-md p-8">{children}</div>
+        <div className="h-full rounded-md p-8 overflow-hidden">{children}</div>
       </Layout>
     </Layout>
   );

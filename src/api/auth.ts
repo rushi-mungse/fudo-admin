@@ -24,3 +24,5 @@ export const setPassword = (data: ISetPasswordData) =>
   api.post("/auth/set-password", data);
 
 export const logout = () => api.get("/auth/logout");
+
+export const getUsers = () => api.get("/auth/users");
