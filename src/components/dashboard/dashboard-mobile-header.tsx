@@ -2,31 +2,31 @@
 
 import Link from "next/link";
 import React, { useState } from "react";
-import { Button, Drawer } from "antd";
+import { Avatar, Button, Drawer, Typography } from "antd";
 import { usePathname } from "next/navigation";
 
 import { cn } from "@/lib/utils";
-import { navConfig } from "@/config/nav";
 
 import { BiMenuAltRight } from "react-icons/bi";
-import { LogoLink } from "@/components/logo-link";
 import { CartNav } from "@/components/cart-nav";
 
 import { IoMdClose } from "react-icons/io";
 import { useAuthStore } from "@/lib/store";
+import { dashboardNavConfig } from "@/config/dashboard-nav";
 
-export const MobileNav = () => {
+const { Text } = Typography;
+
+export const DashboardMobileHeader = () => {
   const [open, setOpen] = useState(false);
   const showDrawer = () => setOpen(true);
   const onClose = () => setOpen(false);
   const pathname = usePathname();
 
-  const auth = useAuthStore((state) => state.auth);
+  const { auth } = useAuthStore((state) => state);
 
   return (
-    <div className="flex w-[90%] mx-auto container md:hidden h-12 items-center justify-between">
-      <div className="flex items-center justify-between w-full">
-        <LogoLink />
+    <div className="lg:hidden h-[60px] overflow-hidden flex items-center justify-center bg-white">
+      <div className="flex items-center justify-end w-full">
         <div className="flex items-center justify-center space-x-2">
           <CartNav isActive={pathname === "/cart"} />
           <Button
@@ -44,15 +44,26 @@ export const MobileNav = () => {
         onClose={onClose}
         closable={false}
         open={open}
-        width={200}
+        className="w-full sm:w-[350px]"
       >
         <div className="w-full flex items-center justify-end">
           <Button onClick={onClose} type="text">
             <IoMdClose className="size-5" />
           </Button>
         </div>
+
+        <div className="flex items-center justify-between gap-1 my-4 pb-2 border-b border-n-4">
+          <Text className="font-bold">{auth.user?.fullName}</Text>
+          <Avatar
+            src={auth.user?.avatar}
+            className="border border-gray/50 ml-1"
+          >
+            R
+          </Avatar>
+        </div>
+
         <div className="flex flex-col space-y-2">
-          {navConfig.map(
+          {dashboardNavConfig.map(
             (nav, id) =>
               (nav.showIfIsAuth === auth.isAuth ||
                 nav?.showIfIsAuth === undefined) && (

@@ -14,11 +14,12 @@ export interface ILoginData {
 
 export interface IUser {
   _id: string;
-  fullname: string;
+  fullName: string;
   email: string;
   role: "admin" | "customer";
   status: "valid" | "active" | "banned";
   password: string;
+  avatar: string | null;
   updatedAt: Date;
   createdAt: Date;
 }
@@ -68,4 +69,26 @@ export interface ISendOtpData {
   email: string;
   password: string;
   confirmPassword: string;
+}
+
+export interface IForgetPasswordData {
+  email: string;
+}
+
+export interface IForgetPasswordResponse {
+  otpInfo: IOtpInfo;
+  otp?: string;
+}
+
+export interface ISetPasswordData {
+  fullName: string;
+  email: string;
+  otp: string;
+  hashOtp: string;
+  password: string;
+  confirmPassword: string;
+}
+
+export interface ISetPasswordResponse {
+  user: IUser;
 }

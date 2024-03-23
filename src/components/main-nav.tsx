@@ -38,7 +38,7 @@ export const MainNav = () => {
         </div>
       </div>
       <div className="flex items-center justify-center gap-4">
-        <CartNav />
+        <CartNav isActive={pathname === "/cart"} />
 
         {!auth.isAuth ? (
           <>

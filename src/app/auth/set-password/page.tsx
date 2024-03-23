@@ -1,38 +1,42 @@
 "use client";
 
 import Image from "next/image";
-import { CheckCircleOutlined } from "@ant-design/icons";
 import { Button, Form, message } from "antd";
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
+import { useRouter } from "next/navigation";
 
-import { OtpRules } from "@/lib/rules";
-import { verifyOtp } from "@/api/auth";
+import { OtpRules, PasswordRules } from "@/lib/rules";
+import { setPassword } from "@/api/auth";
 
 import { OtpField } from "@/components/ui/otp-field";
-import { ErrorType, IVerifyOtp, IVerifyOtpResponse } from "@/types";
-import { useAuthStore, useOtpStore } from "@/lib/store";
-import { useRouter } from "next/navigation";
+import { PasswordInputField } from "@/components/ui/password-field";
+
+import { ErrorType, ISetPasswordData, ISetPasswordResponse } from "@/types";
+import { useOtpStore } from "@/lib/store";
+
+import { RiLockPasswordLine } from "react-icons/ri";
 
 const { useForm } = Form;
 
-const VerifyOtpPage = () => {
+const SetPasswordPage = () => {
   const [form] = useForm();
   const [context, contextHolder] = message.useMessage();
   const { otpInfo, clearOtp } = useOtpStore((state) => state);
-  const setAuth = useAuthStore((state) => state.setAuth);
   const router = useRouter();
 
-  const handleOnSuccess = (data: IVerifyOtpResponse) => {
-    form.resetFields();
+  const handleOnSuccess = (data: ISetPasswordResponse) => {
     context.open({
       type: "success",
-      content: "Otp verify successfully.",
+      content: "Set password successfully please login an account.",
       duration: 2,
     });
-    setAuth(data.user);
+
     clearOtp();
-    router.push("/dashboard");
+    setTimeout(() => {
+      form.resetFields();
+      router.push("/auth/login");
+    }, 1000);
   };
 
   const handleOnError = (err: AxiosError) => {
@@ -45,8 +49,8 @@ const VerifyOtpPage = () => {
   };
 
   const { mutate, isPending } = useMutation({
-    mutationKey: ["verify-otp"],
-    mutationFn: async (data: IVerifyOtp) => verifyOtp(data),
+    mutationKey: ["set-password"],
+    mutationFn: async (data: ISetPasswordData) => setPassword(data),
     onSuccess: async ({ data }) => handleOnSuccess(data),
     onError: async (err: AxiosError) => handleOnError(err),
   });
@@ -59,12 +63,16 @@ const VerifyOtpPage = () => {
         duration: 2,
       });
     }
-    const otp = form.getFieldsValue().otp.join("");
+    const { password, confirmPassword, otp } = form.getFieldsValue();
+    const userOtp = otp.join("");
+
     mutate({
-      otp,
+      otp: userOtp,
       email: otpInfo.email,
       fullName: otpInfo.fullName,
       hashOtp: otpInfo.hashOtp,
+      password,
+      confirmPassword,
     });
   };
 
@@ -84,19 +92,12 @@ const VerifyOtpPage = () => {
 
           <div className="flex items-center justify-center flex-col md:ring-1 md:ring-n-4 py-10 rounded-md">
             <div className="w-full md:w-[350px]">
-              <p className="h3 text-xl lg:text-3xl text-center">
-                Otp Verification
-              </p>
+              <p className="h3 text-xl lg:text-3xl text-center">Set Password</p>
               <div className="text-n-4 text-xs sm:italic text-center tracking-widest md:text-sm py-5 max-w-[350px]">
                 4 Digit code has been sent to your email address
               </div>
-
               <div className="text-active italic py-2 text-center text-sm">
                 {otpInfo?.email}
-              </div>
-
-              <div className="text-6xl text-n-4 text-center py-6">
-                <CheckCircleOutlined />
               </div>
 
               <Form
@@ -105,6 +106,21 @@ const VerifyOtpPage = () => {
                 onFinish={() => handleOnFinish()}
               >
                 <OtpField name="otp" fieldRules={OtpRules} />
+
+                <PasswordInputField
+                  name="password"
+                  placeholder="Enter strong password"
+                  icon={<RiLockPasswordLine className="pr-2 size-6" />}
+                  fieldRules={PasswordRules}
+                />
+
+                <PasswordInputField
+                  name="confirmPassword"
+                  placeholder="Confirm password"
+                  icon={<RiLockPasswordLine className="pr-2 size-6" />}
+                  fieldRules={PasswordRules}
+                />
+
                 <Button
                   type="primary"
                   shape="round"
@@ -112,7 +128,7 @@ const VerifyOtpPage = () => {
                   htmlType="submit"
                   loading={isPending}
                 >
-                  Verify Otp
+                  Set Password
                 </Button>
               </Form>
             </div>
@@ -123,4 +139,4 @@ const VerifyOtpPage = () => {
   );
 };
 
-export default VerifyOtpPage;
+export default SetPasswordPage;

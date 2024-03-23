@@ -10,6 +10,11 @@ export const navConfig: INavItem[] = [
     showIfIsAuth: false,
   },
   {
+    title: "Profile",
+    href: "/profile",
+    showIfIsAuth: true,
+  },
+  {
     title: "Login",
     href: "/auth/login",
     isOnlyMobile: true,
