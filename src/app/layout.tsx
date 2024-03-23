@@ -3,8 +3,6 @@ import { Inter } from "next/font/google";
 import "@/styles/globals.css";
 
 import { AntdRegistry } from "@ant-design/nextjs-registry";
-import { SiteHeader } from "@/components/site-header";
-import { SiteFooter } from "@/components/site-footer";
 import { ReactQueryProvider } from "@/components/react-query-provider";
 import { RefreshComponent } from "@/components/refresh-component";
 
@@ -28,13 +26,7 @@ export default function RootLayout({
         <AntdRegistry>
           <ReactQueryProvider>
             <ReactQueryDevtools />
-            <RefreshComponent>
-              <div className="bg-background relative flex min-h-screen flex-col">
-                <SiteHeader />
-                <main className="flex-1">{children}</main>
-                <SiteFooter />
-              </div>
-            </RefreshComponent>
+            <RefreshComponent>{children}</RefreshComponent>
           </ReactQueryProvider>
         </AntdRegistry>
       </body>

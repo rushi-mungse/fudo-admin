@@ -6,21 +6,15 @@ import { Layout } from "antd";
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <html lang="en">
-      <body>
-        <main>
-          <Layout style={{ minHeight: "100vh" }}>
-            <DashboardMobileSidebar />
-            <DashboardMainSidebar />
-            <Layout>
-              <DashboardMainHeader />
-              <DashboardMobileHeader />
-              <div className="h-full rounded-md p-8">{children}</div>
-            </Layout>
-          </Layout>
-        </main>
-      </body>
-    </html>
+    <Layout style={{ minHeight: "100vh" }}>
+      <DashboardMobileSidebar />
+      <DashboardMainSidebar />
+      <Layout>
+        <DashboardMainHeader />
+        <DashboardMobileHeader />
+        <div className="h-full rounded-md p-8">{children}</div>
+      </Layout>
+    </Layout>
   );
 };
 

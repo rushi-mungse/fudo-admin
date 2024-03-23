@@ -8,54 +8,57 @@ import {
   SnippetsOutlined,
   LogoutOutlined,
 } from "@ant-design/icons";
-import { Menu } from "antd";
+import { Button, Menu } from "antd";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
 const DashboardSidebarLinks = () => {
+  const [currentPage, setCurrentPage] = useState<string>("");
+  const pathname = usePathname();
+  console.log(pathname);
+
+  useEffect(() => {
+    setCurrentPage(pathname);
+  }, [pathname]);
+
   return (
     <div className="flex justify-between flex-col h-[calc(100vh_-80px)]">
       <Menu
         mode="inline"
-        defaultSelectedKeys={["1"]}
+        defaultSelectedKeys={[currentPage]}
         items={[
           {
-            key: "1",
+            key: "/dashboard/summary",
             icon: <BarChartOutlined />,
-            label: "Summary",
+            label: <Link href="/dashboard/summary">Summary</Link>,
           },
           {
-            key: "2",
+            key: "/dashboard/users",
             icon: <TeamOutlined />,
-            label: "Users",
+            label: <Link href="/dashboard/users">Users</Link>,
           },
           {
-            key: "3",
+            key: "/dashboard/products",
             icon: <BarsOutlined />,
-            label: "Products",
+            label: <Link href="/dashboard/products">Products</Link>,
           },
           {
-            key: "4",
+            key: "/dashboard/categories",
             icon: <SnippetsOutlined />,
-            label: "Category",
+            label: <Link href="/dashboard/categories">Categories</Link>,
           },
           {
-            key: "5",
+            key: "/dashboard/orders",
             icon: <FileTextOutlined />,
-            label: "Orders",
+            label: <Link href="/dashboard/orders">Orders</Link>,
           },
         ]}
       />
 
-      <Menu
-        mode="inline"
-        defaultSelectedKeys={["1"]}
-        items={[
-          {
-            key: "8",
-            icon: <LogoutOutlined />,
-            label: "Logout",
-          },
-        ]}
-      />
+      <Button icon={<LogoutOutlined />} onClick={() => {}}>
+        Logout
+      </Button>
     </div>
   );
 };
