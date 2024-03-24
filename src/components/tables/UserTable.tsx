@@ -12,9 +12,7 @@ export const UserTable: ColumnsType<IUser> = [
     dataIndex: "_id",
     key: "_id",
     render: (_id) => (
-      <Link href={`/user/${_id}`} className="hover:text-active text-active/80">
-        {_id}
-      </Link>
+      <button className="hover:text-active text-active/80">{_id}</button>
     ),
   },
   {

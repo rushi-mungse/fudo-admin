@@ -26,3 +26,5 @@ export const setPassword = (data: ISetPasswordData) =>
 export const logout = () => api.get("/auth/logout");
 
 export const getUsers = () => api.get("/auth/users");
+
+export const getUser = (userId: string) => api.get(`/auth/${userId}`);
