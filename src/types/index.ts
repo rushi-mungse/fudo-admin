@@ -92,3 +92,19 @@ export interface ISetPasswordData {
 export interface ISetPasswordResponse {
   user: IUser;
 }
+
+export interface OptionType {
+  value: string;
+  key: string;
+}
+
+export interface IGetUsers {
+  data: {
+    users: IUser[];
+    metadata: {
+      totalCount: number;
+      perPage: number;
+      currentPage: number;
+    };
+  };
+}
