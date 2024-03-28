@@ -1,6 +1,6 @@
 import axios from "axios";
-const API_BASE_URL = "https://fudo-auth-service.vercel.app/api";
-// const API_BASE_URL = "http://localhost:5000/api";
+// const API_BASE_URL = "https://fudo-auth-service.vercel.app/api";
+const API_BASE_URL = "http://localhost:5000/api";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -55,6 +55,18 @@ export const uploadUserProfilePicture = async (data: FormData) => {
   return await axios({
     method: "POST",
     url: `${API_BASE_URL}/auth/upload-profile-picture`,
+    data,
+    withCredentials: true,
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+};
+
+export const createUser = async (data: FormData) => {
+  return await axios({
+    method: "POST",
+    url: `${API_BASE_URL}/auth/create-user`,
     data,
     withCredentials: true,
     headers: {

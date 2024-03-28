@@ -108,3 +108,11 @@ export interface IGetUsers {
     };
   };
 }
+
+export interface ICreateUser {
+  fullName: string;
+  email: string;
+  role: "admin" | "customer" | "tester";
+  phoneNumber: string;
+  password: string;
+}

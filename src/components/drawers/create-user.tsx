@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Avatar, Button, Drawer, Form, UploadFile } from "antd";
+import { Button, Drawer, Form, UploadFile, message } from "antd";
 import {
   EmailRules,
   FullNameRules,
@@ -9,6 +9,8 @@ import {
   PhoneNumberRules,
   UserRoleRules,
 } from "@/lib/rules";
+import { useMutation } from "react-query";
+import { AxiosError } from "axios";
 
 import { UserRoleOptions } from "@/constants";
 
@@ -17,11 +19,13 @@ import { InputField } from "@/components/ui/input-field";
 import SelectField from "@/components/ui/select-filed";
 import { UploadField } from "@/components/ui/upload-field";
 
-import { TiUserOutline } from "react-icons/ti";
 import { RiLockPasswordLine } from "react-icons/ri";
 import { CiMail } from "react-icons/ci";
 import { CgNametag } from "react-icons/cg";
 import { MdOutlinePhoneEnabled } from "react-icons/md";
+
+import { ErrorType, ICreateUser } from "@/types";
+import { createUser } from "@/api/client";
 
 const { useForm } = Form;
 
@@ -33,28 +37,61 @@ interface CreateUserProps {
 export const CreateUser = ({ onClose, open }: CreateUserProps) => {
   const [form] = useForm();
   const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const [context, contextHolder] = message.useMessage();
+
+  const { mutate, isLoading } = useMutation({
+    mutationKey: ["create-user", form.getFieldValue],
+    mutationFn: (data: FormData) => createUser(data),
+    onSuccess: () => {
+      context.open({
+        type: "success",
+        content: "User created successfully.",
+        duration: 2,
+      });
+      form.resetFields();
+    },
+    onError: (err: AxiosError) => {
+      const errors = err.response?.data as unknown as ErrorType;
+      context.open({
+        type: "error",
+        content: errors.error[0].msg,
+        duration: 2,
+      });
+    },
+  });
 
   return (
     <>
       <Drawer onClose={onClose} title="Create User" open={open} width={600}>
+        {contextHolder}
         <Form
-          onFinish={(data) => {
-            console.log(data);
+          onFinish={(data: ICreateUser) => {
+            if (!fileList)
+              return context.open({
+                type: "error",
+                content: "User profile picture required!",
+                duration: 2,
+              });
+
+            const formData = new FormData();
+            formData.append("avatar", fileList[0].originFileObj as File);
+            formData.append("fullName", data.fullName);
+            formData.append("email", data.email);
+            formData.append("role", data.role);
+            formData.append("password", data.password);
+            formData.append("phoneNumber", data.phoneNumber);
+            mutate(formData);
           }}
           form={form}
         >
           <label className="pb-2 block">Profile Picture</label>
-          <div className="flex flex-col items-center sm:flex-row gap-4 p-4 border mb-8">
-            <Avatar src={""} icon={<TiUserOutline />} size={100} />
-
-            <div className="h-[70px]">
-              <UploadField
-                fileSize={1}
-                fileList={fileList}
-                setFileList={setFileList}
-                listType="picture"
-              />
-            </div>
+          <div className="mb-4">
+            <UploadField
+              fileSize={1}
+              fileList={fileList}
+              setFileList={setFileList}
+              listType="picture"
+            />
           </div>
 
           <div className="relative">
@@ -109,7 +146,7 @@ export const CreateUser = ({ onClose, open }: CreateUserProps) => {
           </div>
 
           <div className="flex items-center justify-end">
-            <Button htmlType="submit" type="primary">
+            <Button htmlType="submit" type="primary" loading={isLoading}>
               Create User
             </Button>
           </div>
