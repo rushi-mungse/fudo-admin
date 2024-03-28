@@ -23,6 +23,10 @@ import { CiMail } from "react-icons/ci";
 
 import { CgNametag } from "react-icons/cg";
 import { MdOutlinePhoneEnabled } from "react-icons/md";
+import { useQuery } from "react-query";
+import { getUser } from "@/api/auth";
+import { IUser } from "@/types";
+import { Loader } from "../loader";
 
 const { useForm } = Form;
 
@@ -35,11 +39,30 @@ interface EditUserProps {
 export const EditUser = ({ userId, onClose, open }: EditUserProps) => {
   const [form] = useForm();
   const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const [user, setUser] = useState<IUser>();
+
+  const { isLoading } = useQuery({
+    queryKey: ["edit-user", userId],
+    queryFn: () => getUser(userId),
+    onSuccess: ({ data }) => {
+      setUser(data.user);
+    },
+  });
+
+  if (isLoading)
+    return (
+      <div className="flex items-center justify-center py-10">
+        <Loader />
+      </div>
+    );
 
   return (
     <>
       <Drawer onClose={onClose} title="Edit User" open={open} width={600}>
         <Form
+          initialValues={{
+            ...user,
+          }}
           onFinish={(data) => {
             console.log(data);
           }}
@@ -47,7 +70,7 @@ export const EditUser = ({ userId, onClose, open }: EditUserProps) => {
         >
           <label className="pb-2 block">Profile Picture</label>
           <div className="flex flex-col items-center sm:flex-row gap-4 p-4 border mb-8">
-            <Avatar src={""} icon={<TiUserOutline />} size={100} />
+            <Avatar src={user?.avatar} icon={<TiUserOutline />} size={100} />
 
             <div className="h-[70px]">
               <UploadField
@@ -86,16 +109,6 @@ export const EditUser = ({ userId, onClose, open }: EditUserProps) => {
               placeholder="Enter phone number"
               icon={<MdOutlinePhoneEnabled className="pr-2 size-6" />}
               fieldRules={PhoneNumberRules}
-            />
-          </div>
-
-          <div className="relative">
-            <label className="pb-2 block">Password</label>
-            <PasswordInputField
-              name="password"
-              placeholder="Enter strong password"
-              icon={<RiLockPasswordLine className="pr-2 size-6" />}
-              fieldRules={PasswordRules}
             />
           </div>
 
