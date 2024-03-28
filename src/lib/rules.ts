@@ -35,3 +35,11 @@ export const ConfirmPasswordRules: Rule[] = [
 export const OtpRules: Rule[] = [
   { required: true, message: "Please enter otp" },
 ];
+
+export const UserRoleRules: Rule[] = [
+  { required: true, message: "Please enter user role" },
+];
+
+export const PhoneNumberRules: Rule[] = [
+  { required: true, message: "Please enter phone number" },
+];
