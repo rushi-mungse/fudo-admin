@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { AxiosError } from "axios";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation } from "react-query";
 import { Button, Form, message } from "antd";
 
 import { sendOtp } from "@/api/auth";
@@ -53,7 +53,7 @@ const SendOtpPage = () => {
     });
   };
 
-  const { mutate, isPending } = useMutation({
+  const { mutate, isLoading } = useMutation({
     mutationKey: ["send-otp"],
     mutationFn: async (data: ISendOtpData) => sendOtp(data),
     onSuccess: async ({ data }) => handleOnSuccess(data),
@@ -123,7 +123,7 @@ const SendOtpPage = () => {
                   shape="round"
                   htmlType="submit"
                   className="w-full sm:w-fit"
-                  loading={isPending}
+                  loading={isLoading}
                 >
                   Sign Up An Account
                 </Button>

@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Avatar, Drawer, Tag } from "antd";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery } from "react-query";
 import { getUser } from "@/api/auth";
 import { Loader } from "@/components/loader";
 import { TiUserOutline } from "react-icons/ti";

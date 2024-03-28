@@ -12,7 +12,7 @@ import {
   SnippetsOutlined,
   LogoutOutlined,
 } from "@ant-design/icons";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation } from "react-query";
 import { logout } from "@/api/auth";
 import { useAuthStore } from "@/lib/store";
 import { AxiosError } from "axios";

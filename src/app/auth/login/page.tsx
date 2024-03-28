@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { AxiosError } from "axios";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation } from "react-query";
 import { Button, Form, message } from "antd";
 
 import { EmailRules, PasswordRules } from "@/lib/rules";
@@ -49,7 +49,7 @@ const LoginPage = () => {
     });
   };
 
-  const { mutate, isPending } = useMutation({
+  const { mutate, isLoading } = useMutation({
     mutationKey: ["login"],
     mutationFn: async (data: ILoginData) => login(data),
     onSuccess: async ({ data }) => handleOnSuccess(data),
@@ -122,7 +122,7 @@ const LoginPage = () => {
                   shape="round"
                   htmlType="submit"
                   className="w-full sm:w-fit"
-                  loading={isPending}
+                  loading={isLoading}
                 >
                   Login An Account
                 </Button>

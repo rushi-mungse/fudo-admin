@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { Button, Form, message } from "antd";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation } from "react-query";
 import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
 
@@ -48,7 +48,7 @@ const SetPasswordPage = () => {
     });
   };
 
-  const { mutate, isPending } = useMutation({
+  const { mutate, isLoading } = useMutation({
     mutationKey: ["set-password"],
     mutationFn: async (data: ISetPasswordData) => setPassword(data),
     onSuccess: async ({ data }) => handleOnSuccess(data),
@@ -126,7 +126,7 @@ const SetPasswordPage = () => {
                   shape="round"
                   className="mt-6"
                   htmlType="submit"
-                  loading={isPending}
+                  loading={isLoading}
                 >
                   Set Password
                 </Button>
