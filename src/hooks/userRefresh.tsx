@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery } from "react-query";
 import { useAuthStore } from "@/lib/store";
 import { self } from "@/api/auth";
 
