@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { AxiosError } from "axios";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation } from "react-query";
 import { Button, Form, message } from "antd";
 
 import { EmailRules } from "@/lib/rules";
@@ -52,7 +52,7 @@ const ForgetPasswordPage = () => {
     });
   };
 
-  const { mutate, isPending } = useMutation({
+  const { mutate, isLoading } = useMutation({
     mutationKey: ["forget-password"],
     mutationFn: async (data: IForgetPasswordData) => forgetPassword(data),
     onSuccess: async ({ data }) => handleOnSuccess(data),
@@ -101,7 +101,7 @@ const ForgetPasswordPage = () => {
                   shape="round"
                   htmlType="submit"
                   className="w-full sm:w-fit"
-                  loading={isPending}
+                  loading={isLoading}
                 >
                   Send Otp For Set Password
                 </Button>
