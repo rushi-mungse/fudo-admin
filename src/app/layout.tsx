@@ -6,8 +6,6 @@ import { AntdRegistry } from "@ant-design/nextjs-registry";
 import { ReactQueryProvider } from "@/components/react-query-provider";
 import { RefreshComponent } from "@/components/refresh-component";
 
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -25,7 +23,6 @@ export default function RootLayout({
       <body className={inter.className}>
         <AntdRegistry>
           <ReactQueryProvider>
-            <ReactQueryDevtools />
             <RefreshComponent>{children}</RefreshComponent>
           </ReactQueryProvider>
         </AntdRegistry>
