@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, Input, Table, message } from "antd";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "react-query";
 import { SearchOutlined, UserAddOutlined } from "@ant-design/icons";
 
 import { deleteUser, getUsers } from "@/api/auth";
@@ -10,7 +10,7 @@ import { Avatar, Tag } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { UserOutlined } from "@ant-design/icons";
 
-import { ErrorType, IUser } from "@/types";
+import { ErrorType, IGetUsers, IUser } from "@/types";
 import { TableTitle } from "@/components/ui/table-title";
 import { ShowUser } from "@/components/drawers/show-user";
 import { useState } from "react";
@@ -18,8 +18,15 @@ import { useState } from "react";
 import { MdOutlineDelete } from "react-icons/md";
 import { TiEdit } from "react-icons/ti";
 import { AxiosError } from "axios";
+import { EditUser } from "@/components/drawers/edit-user";
+import { CreateUser } from "@/components/drawers/create-user";
+import debounce from "debounce";
+
+const PER_PAGE = 6;
 
 const UserPage = () => {
+  const [users, setUsers] = useState<IUser[]>([]);
+
   const [userId, setUserId] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const showUserDrawer = () => setOpen(true);
@@ -29,14 +36,36 @@ const UserPage = () => {
     showUserDrawer();
   };
 
-  const { isLoading, data, refetch, isError } = useQuery({
-    queryKey: ["all-users"],
-    queryFn: async () => getUsers(),
+  const [editUserId, setEditUserId] = useState<string | null>(null);
+  const [isEditUserDrawerOpen, setEditUserDrawerOpen] = useState(false);
+  const editUserDrawerOpen = () => setEditUserDrawerOpen(true);
+  const editUserDrawerClose = () => setEditUserDrawerOpen(false);
+  const onEditUserHandler = (id: string) => {
+    setEditUserId(id);
+    editUserDrawerOpen();
+  };
+
+  const [isCreateUserDrawerOpen, setCreateUserDrawerOpen] = useState(false);
+  const createUserDrawerClose = () => setCreateUserDrawerOpen(false);
+
+  const [totalCount, setTotalCount] = useState<number>(0);
+  const [queryParams, setQueryParams] = useState({
+    perPage: PER_PAGE,
+    currentPage: 1,
   });
 
-  /**
-   * Delete user userId : string
-   */
+  const { isLoading, refetch, isError } = useQuery({
+    queryKey: ["get-users", queryParams],
+    queryFn: async () => {
+      const data = queryParams as unknown as Record<string, string>;
+      const queryString = new URLSearchParams(data).toString();
+      return getUsers(queryString);
+    },
+    onSuccess: ({ data }: IGetUsers) => {
+      setTotalCount(data.metadata.totalCount);
+      setUsers(data.users);
+    },
+  });
 
   const [context, contextHolder] = message.useMessage();
 
@@ -58,14 +87,12 @@ const UserPage = () => {
     });
   };
 
-  const { mutate, isPending } = useMutation({
+  const { mutate, isLoading: isPending } = useMutation({
     mutationKey: ["delete-user", userId],
     mutationFn: async (userId: string) => deleteUser(userId),
     onSuccess: async () => handleOnSuccess(),
     onError: async (err: AxiosError) => handleOnError(err),
   });
-
-  /**********************/
 
   const UserTable: ColumnsType<IUser> = [
     {
@@ -147,7 +174,7 @@ const UserPage = () => {
                 outline: "none",
                 boxShadow: "none",
               }}
-              onClick={() => {}}
+              onClick={() => onEditUserHandler(record._id)}
               icon={
                 <TiEdit className="text-green-300 hover:text-green-500 size-4 transition-all" />
               }
@@ -160,6 +187,7 @@ const UserPage = () => {
                 outline: "none",
                 boxShadow: "none",
               }}
+              loading={isPending}
               onClick={() => {
                 setUserId(record._id);
                 mutate(record._id);
@@ -191,12 +219,15 @@ const UserPage = () => {
             placeholder="Search user"
             style={{ width: 250 }}
             suffix={<SearchOutlined className="text-gray" />}
+            onChange={debounce((e) => {
+              setQueryParams((prev) => ({ ...prev, q: e.target.value }));
+            }, 500)}
           />
         </div>
         <Button
           type="primary"
           icon={<UserAddOutlined />}
-          // onClick={handleOnClick}
+          onClick={() => setCreateUserDrawerOpen(true)}
         >
           Create User
         </Button>
@@ -205,8 +236,17 @@ const UserPage = () => {
       <Table
         bordered
         columns={UserTable}
-        pagination={{ position: ["bottomRight"] }}
-        dataSource={data?.data.users}
+        pagination={{
+          total: totalCount,
+          current: queryParams.currentPage,
+          pageSize: queryParams.perPage,
+          onChange: (page) => {
+            setQueryParams((prev) => {
+              return { ...prev, currentPage: page };
+            });
+          },
+        }}
+        dataSource={users}
         loading={isLoading}
         rowKey="_id"
         className="overflow-x-auto bg-white"
@@ -219,6 +259,19 @@ const UserPage = () => {
           open={open}
         />
       )}
+
+      {editUserId && (
+        <EditUser
+          userId={editUserId}
+          onClose={editUserDrawerClose}
+          open={isEditUserDrawerOpen}
+        />
+      )}
+
+      <CreateUser
+        onClose={createUserDrawerClose}
+        open={isCreateUserDrawerOpen}
+      />
     </div>
   );
 };
