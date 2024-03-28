@@ -4,7 +4,6 @@ import React from "react";
 import { Avatar, Drawer, Tag } from "antd";
 import { useQuery } from "react-query";
 import { getUser } from "@/api/auth";
-import { Loader } from "@/components/loader";
 import { TiUserOutline } from "react-icons/ti";
 import { dateFormater } from "@/utils/date-formater";
 import { InputWithLabel } from "@/components/ui/input-with-label";
@@ -33,7 +32,7 @@ export const TagWithLabel = ({ label, value }: TagWithLabelProps) => {
 };
 
 export const ShowUser = ({ userId, closeUserDrawer, open }: ShowUserProps) => {
-  const { isLoading, data } = useQuery({
+  const { data } = useQuery({
     queryKey: ["user", userId],
     queryFn: async () => getUser(userId),
   });
@@ -46,62 +45,53 @@ export const ShowUser = ({ userId, closeUserDrawer, open }: ShowUserProps) => {
         open={open}
         width={600}
       >
-        {isLoading ? (
-          <div className="flex items-center justify-center">
-            <Loader />
+        <>
+          <div className="mb-12 border p-3 relative rounded-lg">
+            <div className="border border-n-4 h-fit w-fit rounded-full overflow-hidden">
+              <Avatar
+                src={data?.data.user.avatar}
+                icon={<TiUserOutline />}
+                size={100}
+              />
+            </div>
           </div>
-        ) : (
-          <>
-            <div className="mb-12 border p-3 relative rounded-lg">
-              <div className="border border-n-4 h-fit w-fit rounded-full overflow-hidden">
-                <Avatar
-                  src={data?.data.user.avatar}
-                  icon={<TiUserOutline />}
-                  size={100}
-                />
-              </div>
+          <div className="grid grid-cols-1 gap-x-4 gap-y-8">
+            <InputWithLabel value={data?.data.user._id} label="User Id">
+              <CopyClipboard data={data?.data.user._id} />
+            </InputWithLabel>
+
+            <InputWithLabel label="Full Name" value={data?.data.user.fullName}>
+              <CopyClipboard data={data?.data.user.fullName} />
+            </InputWithLabel>
+
+            <InputWithLabel label="Email" value={data?.data.user.email}>
+              <CopyClipboard data={data?.data.user.email} />
+            </InputWithLabel>
+
+            <InputWithLabel
+              label="Phone Number"
+              value={data?.data.user.phoneNumber}
+            >
+              <CopyClipboard data={data?.data.user.phoneNumber} />
+            </InputWithLabel>
+
+            <div className="grid grid-cols-2 gap-8">
+              <TagWithLabel value={data?.data.user.role} label="User Role" />
+              <TagWithLabel
+                value={data?.data.user.status}
+                label="User Status"
+              />
+              <TagWithLabel
+                value={dateFormater(data?.data.user.createdAt)}
+                label="Created At"
+              />
+              <TagWithLabel
+                value={dateFormater(data?.data.user.updatedAt)}
+                label="Updated At"
+              />
             </div>
-            <div className="grid grid-cols-1 gap-x-4 gap-y-8">
-              <InputWithLabel value={data?.data.user._id} label="User Id">
-                <CopyClipboard data={data?.data.user._id} />
-              </InputWithLabel>
-
-              <InputWithLabel
-                label="Full Name"
-                value={data?.data.user.fullName}
-              >
-                <CopyClipboard data={data?.data.user.fullName} />
-              </InputWithLabel>
-
-              <InputWithLabel label="Email" value={data?.data.user.email}>
-                <CopyClipboard data={data?.data.user.email} />
-              </InputWithLabel>
-
-              <InputWithLabel
-                label="Phone Number"
-                value={data?.data.user.phoneNumber}
-              >
-                <CopyClipboard data={data?.data.user.phoneNumber} />
-              </InputWithLabel>
-
-              <div className="grid grid-cols-2 gap-8">
-                <TagWithLabel value={data?.data.user.role} label="User Role" />
-                <TagWithLabel
-                  value={data?.data.user.status}
-                  label="User Status"
-                />
-                <TagWithLabel
-                  value={dateFormater(data?.data.user.createdAt)}
-                  label="Created At"
-                />
-                <TagWithLabel
-                  value={dateFormater(data?.data.user.updatedAt)}
-                  label="Updated At"
-                />
-              </div>
-            </div>
-          </>
-        )}
+          </div>
+        </>
       </Drawer>
     </>
   );

@@ -8,6 +8,7 @@ interface PropType {
   fieldRules: Rule[];
   placeholder: string;
   icon: React.ReactNode;
+  value?: string;
 }
 
 export const InputField = ({
@@ -15,6 +16,7 @@ export const InputField = ({
   fieldRules,
   placeholder,
   icon,
+  value,
 }: PropType) => {
   return (
     <Item rules={fieldRules} className="w-full" name={name}>
@@ -22,6 +24,7 @@ export const InputField = ({
         placeholder={placeholder}
         prefix={icon}
         className="font-light px-4 py-1 text-[14px]"
+        value={value}
       />
     </Item>
   );

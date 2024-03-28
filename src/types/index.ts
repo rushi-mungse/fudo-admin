@@ -22,6 +22,7 @@ export interface IUser {
   avatar: string | null;
   updatedAt: Date;
   createdAt: Date;
+  phoneNumber: string;
 }
 
 export interface ILoginResponseData {
