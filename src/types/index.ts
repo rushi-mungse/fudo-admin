@@ -117,3 +117,69 @@ export interface ICreateUser {
   phoneNumber: string;
   password: string;
 }
+
+export interface ICategory {
+  name: string;
+  priceConfiguration: IPriceConfiguration;
+  attribute: [IAttribute];
+  _id: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface IPriceConfiguration {
+  [key: string]: {
+    priceType: "base" | "aditional";
+    availableOptions: [string];
+  };
+}
+
+export interface IAttribute {
+  name: string;
+  widgetType: "switch" | "radio";
+  defaultValue: string | number;
+  availableOptions: [string];
+}
+
+export interface IUpdateCategory {
+  name: string;
+}
+
+export interface IAttributeForProduct {
+  name: string;
+  value: string;
+}
+
+export interface IPriceConfigurationForProduct {
+  [key: string]: {
+    priceType: "base" | "aditional";
+    availableOptions: {
+      [key: string]: number;
+    };
+  };
+}
+
+export interface IProductBody {
+  name: string;
+  description: string;
+  image: string;
+  isPublish: string;
+  discount: string;
+  categoryId: string;
+  preparationTime: string;
+  attributes: string;
+  priceConfiguration: string;
+}
+
+export interface IProduct {
+  _id: string;
+  name: string;
+  description: string;
+  image: string;
+  isPublish: boolean;
+  discount: number;
+  categoryId: ICategory;
+  preparationTime: number;
+  attributes: IAttributeForProduct[];
+  priceConfiguration: IPriceConfigurationForProduct;
+}
