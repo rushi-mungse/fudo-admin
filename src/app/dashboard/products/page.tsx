@@ -1,12 +1,24 @@
 "use client";
 
-import { Avatar, Button, Input, Table, Tag, message } from "antd";
+import {
+  Avatar,
+  Button,
+  Form,
+  Input,
+  Select,
+  Space,
+  Switch,
+  Table,
+  Tag,
+  Typography,
+  message,
+} from "antd";
 import { useQuery } from "react-query";
 import { SearchOutlined, UserAddOutlined } from "@ant-design/icons";
 
 import type { ColumnsType } from "antd/es/table";
 
-import { IAttribute, IProduct } from "@/types";
+import { IAttribute, ICategory, IProduct, OptionType } from "@/types";
 import { TableTitle } from "@/components/ui/table-title";
 
 import { useState } from "react";
@@ -20,11 +32,18 @@ import { getRandomColor } from "@/utils/radndom-color";
 import { getProducts } from "@/api/product";
 
 import { FaProductHunt } from "react-icons/fa6";
+import { getsCategory } from "@/api/category";
+import { getCategoryOptions } from "@/utils/get-categories";
+
+const { Item } = Form;
+const { Text } = Typography;
 
 const PER_PAGE = 6;
 
 const CategoryPage = () => {
+  const [context, contextHolder] = message.useMessage();
   const [product, setProduct] = useState<IProduct[]>([]);
+  const [category, setCagegory] = useState<ICategory[]>([]);
 
   const [totalCount, setTotalCount] = useState<number>(0);
   const [queryParams, setQueryParams] = useState({
@@ -32,8 +51,14 @@ const CategoryPage = () => {
     currentPage: 1,
   });
 
+  const {} = useQuery({
+    queryKey: ["get-categories"],
+    queryFn: async () => getsCategory(),
+    onSuccess: ({ data }) => setCagegory(data.categories),
+  });
+
   const { isLoading, refetch, isError } = useQuery({
-    queryKey: ["get-categories", queryParams],
+    queryKey: ["get-products", queryParams],
     queryFn: async () => {
       const data = queryParams as unknown as Record<string, string>;
       const queryString = new URLSearchParams(data).toString();
@@ -44,8 +69,6 @@ const CategoryPage = () => {
       setProduct(data.products);
     },
   });
-
-  const [context, contextHolder] = message.useMessage();
 
   const ProductTable: ColumnsType<IProduct> = [
     {
@@ -83,6 +106,16 @@ const CategoryPage = () => {
       key: "category-name",
       render: (_, record) => (
         <Tag color={getRandomColor()}>{record.categoryId.name}</Tag>
+      ),
+    },
+    {
+      title: <TableTitle title="Status" />,
+      dataIndex: "isPublish",
+      key: "is-publish",
+      render: (isPublish) => (
+        <Tag color={isPublish ? "blue" : "red"}>
+          {isPublish ? "Published" : "Draft"}
+        </Tag>
       ),
     },
     {
@@ -149,20 +182,62 @@ const CategoryPage = () => {
     <div className="w-full">
       {contextHolder}
       <div className="mb-8 space-y-4 md:flex items-center justify-between">
-        <div className="flex-center">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8 md:justify-items-center">
           <Input
             allowClear
             placeholder="Search product"
-            style={{ width: 250 }}
+            style={{ width: 250, height: 32 }}
             suffix={<SearchOutlined className="text-gray" />}
             onChange={debounce((e) => {
               setQueryParams((prev) => ({ ...prev, q: e.target.value }));
             }, 500)}
           />
+
+          <Item name={"category"}>
+            <Select
+              onChange={(value) =>
+                setQueryParams((prev) => {
+                  return {
+                    ...prev,
+                    category: value,
+                  };
+                })
+              }
+              placeholder={"filter category wise"}
+              style={{ width: 250 }}
+              options={getCategoryOptions(category)}
+              loading={isLoading}
+            />
+          </Item>
+
+          <Space>
+            <Item name="isPublish">
+              <Switch
+                defaultChecked={false}
+                onChange={(value) => {
+                  setQueryParams((prev) => {
+                    return {
+                      ...prev,
+                      isPublish: value,
+                    };
+                  });
+                }}
+              />
+            </Item>
+            <Text style={{ marginBottom: 22, display: "block" }}>
+              Show only published
+            </Text>
+          </Space>
+
+          <Button
+            className="inline-block w-[250px]"
+            type="primary"
+            icon={<UserAddOutlined />}
+            onClick={() => {}}
+          >
+            Create Product
+          </Button>
         </div>
-        <Button type="primary" icon={<UserAddOutlined />} onClick={() => {}}>
-          Create Product
-        </Button>
       </div>
 
       <Table
