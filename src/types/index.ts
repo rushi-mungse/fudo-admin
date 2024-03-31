@@ -97,6 +97,7 @@ export interface ISetPasswordResponse {
 export interface OptionType {
   value: string;
   key: string;
+  label?: React.ReactNode;
 }
 
 export interface IGetUsers {
@@ -178,7 +179,7 @@ export interface IProduct {
   image: string;
   isPublish: boolean;
   discount: number;
-  categoryId: ICategory;
+  category: ICategory;
   preparationTime: number;
   attributes: IAttributeForProduct[];
   priceConfiguration: IPriceConfigurationForProduct;

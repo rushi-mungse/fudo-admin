@@ -65,7 +65,7 @@ const CategoryPage = () => {
       return getProducts(queryString);
     },
     onSuccess: ({ data }) => {
-      // setTotalCount(data.metadata.totalCount);
+      setTotalCount(data.metadata.totalCount);
       setProduct(data.products);
     },
   });
@@ -105,7 +105,7 @@ const CategoryPage = () => {
       dataIndex: "category.name",
       key: "category-name",
       render: (_, record) => (
-        <Tag color={getRandomColor()}>{record.categoryId.name}</Tag>
+        <Tag color={getRandomColor()}>{record.category.name}</Tag>
       ),
     },
     {
@@ -195,6 +195,7 @@ const CategoryPage = () => {
 
           <Item name={"category"}>
             <Select
+              allowClear
               onChange={(value) =>
                 setQueryParams((prev) => {
                   return {
