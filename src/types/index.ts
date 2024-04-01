@@ -5,6 +5,7 @@ export interface INavItem {
   href: string;
   isOnlyMobile?: boolean;
   showIfIsAuth?: boolean;
+  icon?: React.ReactNode;
 }
 
 export interface ILoginData {

@@ -1,5 +1,9 @@
 "use client";
 
+import { useState } from "react";
+import { useQuery } from "react-query";
+import debounce from "debounce";
+
 import {
   Avatar,
   Button,
@@ -13,26 +17,21 @@ import {
   Typography,
   message,
 } from "antd";
-import { useQuery } from "react-query";
-import { SearchOutlined, UserAddOutlined } from "@ant-design/icons";
-
+import { SearchOutlined, PlusOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 
-import { IAttribute, ICategory, IProduct, OptionType } from "@/types";
-import { TableTitle } from "@/components/ui/table-title";
+import { getProducts } from "@/api/product";
+import { getsCategory } from "@/api/category";
 
-import { useState } from "react";
+import { IAttribute, ICategory, IProduct } from "@/types";
+import { TableTitle } from "@/components/ui/table-title";
 
 import { MdOutlineDelete } from "react-icons/md";
 import { TiEdit } from "react-icons/ti";
+import { FaProductHunt } from "react-icons/fa6";
 
-import debounce from "debounce";
 import { dateFormater } from "@/utils/date-formater";
 import { getRandomColor } from "@/utils/radndom-color";
-import { getProducts } from "@/api/product";
-
-import { FaProductHunt } from "react-icons/fa6";
-import { getsCategory } from "@/api/category";
 import { getCategoryOptions } from "@/utils/get-categories";
 
 const { Item } = Form;
@@ -40,23 +39,26 @@ const { Text } = Typography;
 
 const PER_PAGE = 6;
 
-const CategoryPage = () => {
+const ProductPage = () => {
   const [context, contextHolder] = message.useMessage();
   const [product, setProduct] = useState<IProduct[]>([]);
   const [category, setCagegory] = useState<ICategory[]>([]);
 
+  // query params
   const [totalCount, setTotalCount] = useState<number>(0);
   const [queryParams, setQueryParams] = useState({
     perPage: PER_PAGE,
     currentPage: 1,
   });
 
-  const {} = useQuery({
+  // get categories
+  useQuery({
     queryKey: ["get-categories"],
     queryFn: async () => getsCategory(),
     onSuccess: ({ data }) => setCagegory(data.categories),
   });
 
+  // get products
   const { isLoading, refetch, isError } = useQuery({
     queryKey: ["get-products", queryParams],
     queryFn: async () => {
@@ -70,6 +72,7 @@ const CategoryPage = () => {
     },
   });
 
+  // product table
   const ProductTable: ColumnsType<IProduct> = [
     {
       title: <TableTitle title="Product Id" />,
@@ -77,7 +80,9 @@ const CategoryPage = () => {
       key: "_id",
       render: (_id) => {
         return (
-          <button className="hover:text-active text-active/80">{_id}</button>
+          <button className="hover:text-active text-active/80">
+            ...{_id.slice(20)}
+          </button>
         );
       },
     },
@@ -181,63 +186,76 @@ const CategoryPage = () => {
   return (
     <div className="w-full">
       {contextHolder}
-      <div className="mb-8 space-y-4 md:flex items-center justify-between">
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8 md:justify-items-center">
-          <Input
-            allowClear
-            placeholder="Search product"
-            style={{ width: 250, height: 32 }}
-            suffix={<SearchOutlined className="text-gray" />}
-            onChange={debounce((e) => {
-              setQueryParams((prev) => ({ ...prev, q: e.target.value }));
-            }, 500)}
-          />
+      <div className="mb-8 grid grid-cols-4 gap-4 xl:justify-items-center">
+        <Input
+          className="col-span-3 xl:col-span-1"
+          allowClear
+          placeholder="Search product"
+          style={{ width: "100%", height: 32 }}
+          suffix={<SearchOutlined className="text-gray" />}
+          onChange={debounce((e) => {
+            setQueryParams((prev) => ({ ...prev, q: e.target.value }));
+          }, 500)}
+        />
 
-          <Item name={"category"}>
-            <Select
-              allowClear
-              onChange={(value) =>
+        <Space className="col-span-1">
+          <Item name="isPublish">
+            <Switch
+              unCheckedChildren="All"
+              checkedChildren="Pub"
+              defaultChecked={false}
+              onChange={(value) => {
                 setQueryParams((prev) => {
                   return {
                     ...prev,
-                    category: value,
+                    isPublish: value,
                   };
-                })
-              }
-              placeholder={"filter category wise"}
-              style={{ width: 250 }}
-              options={getCategoryOptions(category)}
-              loading={isLoading}
+                });
+              }}
             />
           </Item>
+        </Space>
 
-          <Space>
-            <Item name="isPublish">
-              <Switch
-                defaultChecked={false}
-                onChange={(value) => {
-                  setQueryParams((prev) => {
-                    return {
-                      ...prev,
-                      isPublish: value,
-                    };
-                  });
-                }}
-              />
-            </Item>
-            <Text style={{ marginBottom: 22, display: "block" }}>
-              Show only published
-            </Text>
-          </Space>
+        <Item
+          name={"category"}
+          style={{ width: "100%" }}
+          className="col-span-3 xl:col-span-1"
+        >
+          <Select
+            allowClear
+            onChange={(value) =>
+              setQueryParams((prev) => {
+                return {
+                  ...prev,
+                  category: value,
+                };
+              })
+            }
+            placeholder={"filter category"}
+            style={{ width: "100%" }}
+            options={getCategoryOptions(category)}
+            loading={isLoading}
+          />
+        </Item>
 
+        <div className="hidden xl:block col-span-1">
           <Button
-            className="inline-block w-[250px]"
+            className="inline-block w-full"
             type="primary"
-            icon={<UserAddOutlined />}
+            icon={<PlusOutlined />}
             onClick={() => {}}
           >
             Create Product
           </Button>
+        </div>
+
+        <div className="xl:hidden col-span-1">
+          <Button
+            type="primary"
+            shape="circle"
+            icon={<PlusOutlined />}
+            onClick={() => {}}
+          />
         </div>
       </div>
 
@@ -262,4 +280,5 @@ const CategoryPage = () => {
     </div>
   );
 };
-export default CategoryPage;
+
+export default ProductPage;

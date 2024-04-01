@@ -1,32 +1,37 @@
 "use client";
 
-import { Button, Input, Table, message } from "antd";
+import { useState } from "react";
+import debounce from "debounce";
 import { useMutation, useQuery } from "react-query";
-import { SearchOutlined, UserAddOutlined } from "@ant-design/icons";
+import { AxiosError } from "axios";
+
+import {
+  SearchOutlined,
+  UserAddOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
+import { Button, Input, Table, message, Avatar, Tag } from "antd";
+import type { ColumnsType } from "antd/es/table";
 
 import { deleteUser, getUsers } from "@/api/auth";
 
-import { Avatar, Tag } from "antd";
-import type { ColumnsType } from "antd/es/table";
-import { UserOutlined } from "@ant-design/icons";
-
 import { ErrorType, IGetUsers, IUser } from "@/types";
-import { TableTitle } from "@/components/ui/table-title";
-import { ShowUser } from "@/components/drawers/show-user";
-import { useState } from "react";
 
 import { MdOutlineDelete } from "react-icons/md";
 import { TiEdit } from "react-icons/ti";
-import { AxiosError } from "axios";
+
+import { TableTitle } from "@/components/ui/table-title";
+import { ShowUser } from "@/components/drawers/show-user";
 import { EditUser } from "@/components/drawers/edit-user";
 import { CreateUser } from "@/components/drawers/create-user";
-import debounce from "debounce";
 
 const PER_PAGE = 6;
 
 const UserPage = () => {
   const [users, setUsers] = useState<IUser[]>([]);
+  const [context, contextHolder] = message.useMessage();
 
+  // show user drawer
   const [userId, setUserId] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const showUserDrawer = () => setOpen(true);
@@ -36,6 +41,7 @@ const UserPage = () => {
     showUserDrawer();
   };
 
+  // edit user drawer
   const [editUserId, setEditUserId] = useState<string | null>(null);
   const [isEditUserDrawerOpen, setEditUserDrawerOpen] = useState(false);
   const editUserDrawerOpen = () => setEditUserDrawerOpen(true);
@@ -45,15 +51,18 @@ const UserPage = () => {
     editUserDrawerOpen();
   };
 
+  // create user drawer
   const [isCreateUserDrawerOpen, setCreateUserDrawerOpen] = useState(false);
   const createUserDrawerClose = () => setCreateUserDrawerOpen(false);
 
+  // query params
   const [totalCount, setTotalCount] = useState<number>(0);
   const [queryParams, setQueryParams] = useState({
     perPage: PER_PAGE,
     currentPage: 1,
   });
 
+  // get user api call
   const { isLoading, refetch, isError } = useQuery({
     queryKey: ["get-users", queryParams],
     queryFn: async () => {
@@ -67,7 +76,13 @@ const UserPage = () => {
     },
   });
 
-  const [context, contextHolder] = message.useMessage();
+  // delet user api call
+  const { mutate, isLoading: isPending } = useMutation({
+    mutationKey: ["delete-user", userId],
+    mutationFn: async (userId: string) => deleteUser(userId),
+    onSuccess: async () => handleOnSuccess(),
+    onError: async (err: AxiosError) => handleOnError(err),
+  });
 
   const handleOnSuccess = () => {
     context.open({
@@ -87,25 +102,19 @@ const UserPage = () => {
     });
   };
 
-  const { mutate, isLoading: isPending } = useMutation({
-    mutationKey: ["delete-user", userId],
-    mutationFn: async (userId: string) => deleteUser(userId),
-    onSuccess: async () => handleOnSuccess(),
-    onError: async (err: AxiosError) => handleOnError(err),
-  });
-
+  // user table
   const UserTable: ColumnsType<IUser> = [
     {
       title: <TableTitle title="User Id" />,
       dataIndex: "_id",
       key: "_id",
-      render: (_id) => {
+      render: (_id: string) => {
         return (
           <button
             className="hover:text-active text-active/80"
             onClick={() => onClickHandler(_id)}
           >
-            {_id}
+            ...{_id.slice(20)}
           </button>
         );
       },
@@ -212,25 +221,37 @@ const UserPage = () => {
   return (
     <div className="w-full">
       {contextHolder}
-      <div className="mb-8 space-y-4 md:flex items-center justify-between">
+      <div className="mb-8 space-x-4 flex items-center justify-between">
         <div className="flex-center">
           <Input
             allowClear
             placeholder="Search user"
-            style={{ width: 250 }}
+            className="w-full sm:w-[200px]"
             suffix={<SearchOutlined className="text-gray" />}
             onChange={debounce((e) => {
               setQueryParams((prev) => ({ ...prev, q: e.target.value }));
             }, 500)}
           />
         </div>
-        <Button
-          type="primary"
-          icon={<UserAddOutlined />}
-          onClick={() => setCreateUserDrawerOpen(true)}
-        >
-          Create User
-        </Button>
+
+        <div className="hidden sm:block">
+          <Button
+            type="primary"
+            icon={<UserAddOutlined />}
+            onClick={() => setCreateUserDrawerOpen(true)}
+          >
+            Create User
+          </Button>
+        </div>
+
+        <div className="sm:hidden">
+          <Button
+            type="primary"
+            shape="circle"
+            icon={<UserAddOutlined />}
+            onClick={() => setCreateUserDrawerOpen(true)}
+          />
+        </div>
       </div>
 
       <Table
