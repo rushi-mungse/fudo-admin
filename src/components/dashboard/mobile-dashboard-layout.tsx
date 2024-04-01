@@ -36,6 +36,7 @@ export const MobileDashboardLayout = ({
           display: "flex",
           alignItems: "center",
           background: "#ffffff",
+          padding: "0px 20px",
         }}
         className="border-b"
       >
@@ -87,7 +88,7 @@ export const MobileDashboardLayout = ({
           style={{
             background: colorBgContainer,
             minHeight: 280,
-            padding: 48,
+            padding: 20,
             borderRadius: borderRadiusLG,
           }}
         >

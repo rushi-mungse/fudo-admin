@@ -7,6 +7,7 @@ import debounce from "debounce";
 import {
   Avatar,
   Button,
+  Card,
   Form,
   Input,
   Select,
@@ -186,79 +187,81 @@ const ProductPage = () => {
   return (
     <div className="w-full">
       {contextHolder}
-      <div className="mb-8 grid grid-cols-4 gap-4 xl:justify-items-center">
-        <Input
-          className="col-span-3 xl:col-span-1"
-          allowClear
-          placeholder="Search product"
-          style={{ width: "100%", height: 32 }}
-          suffix={<SearchOutlined className="text-gray" />}
-          onChange={debounce((e) => {
-            setQueryParams((prev) => ({ ...prev, q: e.target.value }));
-          }, 500)}
-        />
+      <Card title="Product Filters" style={{ marginBottom: 20 }}>
+        <div className="grid grid-cols-4 gap-4 xl:justify-items-center">
+          <Input
+            className="col-span-3 xl:col-span-1"
+            allowClear
+            placeholder="Search product"
+            style={{ width: "100%", height: 32 }}
+            suffix={<SearchOutlined className="text-gray" />}
+            onChange={debounce((e) => {
+              setQueryParams((prev) => ({ ...prev, q: e.target.value }));
+            }, 500)}
+          />
 
-        <Space className="col-span-1">
-          <Item name="isPublish">
-            <Switch
-              unCheckedChildren="All"
-              checkedChildren="Pub"
-              defaultChecked={false}
-              onChange={(value) => {
+          <Space className="col-span-1">
+            <Item name="isPublish">
+              <Switch
+                unCheckedChildren="All"
+                checkedChildren="Pub"
+                defaultChecked={false}
+                onChange={(value) => {
+                  setQueryParams((prev) => {
+                    return {
+                      ...prev,
+                      isPublish: value,
+                    };
+                  });
+                }}
+              />
+            </Item>
+          </Space>
+
+          <Item
+            name={"category"}
+            style={{ width: "100%" }}
+            className="col-span-3 xl:col-span-1"
+          >
+            <Select
+              allowClear
+              onChange={(value) =>
                 setQueryParams((prev) => {
                   return {
                     ...prev,
-                    isPublish: value,
+                    category: value,
                   };
-                });
-              }}
+                })
+              }
+              placeholder={"filter category"}
+              style={{ width: "100%" }}
+              options={getCategoryOptions(category)}
+              loading={isLoading}
             />
           </Item>
-        </Space>
 
-        <Item
-          name={"category"}
-          style={{ width: "100%" }}
-          className="col-span-3 xl:col-span-1"
-        >
-          <Select
-            allowClear
-            onChange={(value) =>
-              setQueryParams((prev) => {
-                return {
-                  ...prev,
-                  category: value,
-                };
-              })
-            }
-            placeholder={"filter category"}
-            style={{ width: "100%" }}
-            options={getCategoryOptions(category)}
-            loading={isLoading}
-          />
-        </Item>
+          <div className="hidden xl:block col-span-1">
+            <Button
+              className="inline-block w-full"
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => {}}
+            >
+              Create Product
+            </Button>
+          </div>
 
-        <div className="hidden xl:block col-span-1">
-          <Button
-            className="inline-block w-full"
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => {}}
-          >
-            Create Product
-          </Button>
+          <div className="xl:hidden col-span-1">
+            <Button
+              type="primary"
+              shape="circle"
+              icon={<PlusOutlined />}
+              onClick={() => {}}
+            />
+          </div>
         </div>
-
-        <div className="xl:hidden col-span-1">
-          <Button
-            type="primary"
-            shape="circle"
-            icon={<PlusOutlined />}
-            onClick={() => {}}
-          />
-        </div>
-      </div>
-
+      </Card>
+      <span className="font-bold text-active block mb-4">Products List</span>
       <Table
         bordered
         columns={ProductTable}

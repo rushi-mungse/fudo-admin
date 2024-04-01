@@ -10,7 +10,7 @@ import {
   UserAddOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { Button, Input, Table, message, Avatar, Tag } from "antd";
+import { Button, Input, Table, message, Avatar, Tag, Card } from "antd";
 import type { ColumnsType } from "antd/es/table";
 
 import { deleteUser, getUsers } from "@/api/auth";
@@ -25,7 +25,7 @@ import { ShowUser } from "@/components/drawers/show-user";
 import { EditUser } from "@/components/drawers/edit-user";
 import { CreateUser } from "@/components/drawers/create-user";
 
-const PER_PAGE = 6;
+const PER_PAGE = 5;
 
 const UserPage = () => {
   const [users, setUsers] = useState<IUser[]>([]);
@@ -221,39 +221,41 @@ const UserPage = () => {
   return (
     <div className="w-full">
       {contextHolder}
-      <div className="mb-8 space-x-4 flex items-center justify-between">
-        <div className="flex-center">
-          <Input
-            allowClear
-            placeholder="Search user"
-            className="w-full sm:w-[200px]"
-            suffix={<SearchOutlined className="text-gray" />}
-            onChange={debounce((e) => {
-              setQueryParams((prev) => ({ ...prev, q: e.target.value }));
-            }, 500)}
-          />
-        </div>
+      <Card title="User Filters" style={{ marginBottom: 20 }}>
+        <div className="space-x-4 flex items-center justify-between">
+          <div className="flex-center">
+            <Input
+              allowClear
+              placeholder="Search user"
+              className="w-full sm:w-[200px]"
+              suffix={<SearchOutlined className="text-gray" />}
+              onChange={debounce((e) => {
+                setQueryParams((prev) => ({ ...prev, q: e.target.value }));
+              }, 500)}
+            />
+          </div>
 
-        <div className="hidden sm:block">
-          <Button
-            type="primary"
-            icon={<UserAddOutlined />}
-            onClick={() => setCreateUserDrawerOpen(true)}
-          >
-            Create User
-          </Button>
-        </div>
+          <div className="hidden sm:block">
+            <Button
+              type="primary"
+              icon={<UserAddOutlined />}
+              onClick={() => setCreateUserDrawerOpen(true)}
+            >
+              Create User
+            </Button>
+          </div>
 
-        <div className="sm:hidden">
-          <Button
-            type="primary"
-            shape="circle"
-            icon={<UserAddOutlined />}
-            onClick={() => setCreateUserDrawerOpen(true)}
-          />
+          <div className="sm:hidden">
+            <Button
+              type="primary"
+              shape="circle"
+              icon={<UserAddOutlined />}
+              onClick={() => setCreateUserDrawerOpen(true)}
+            />
+          </div>
         </div>
-      </div>
-
+      </Card>
+      <span className="mb-4 block font-bold text-active">Users List</span>
       <Table
         bordered
         columns={UserTable}
