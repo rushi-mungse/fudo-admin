@@ -41,47 +41,87 @@ export const MobileDashboardLayout = ({
         className="border-b"
       >
         <LogoLink />
-        <Menu
-          mode="horizontal"
-          style={{ flex: 1, minWidth: 0, border: "none" }}
-          defaultSelectedKeys={[pathname]}
-          items={[
-            {
-              key: "1",
-              label: "Dashboard",
-              icon: <MdDashboard />,
-              children: [
-                {
-                  key: "/dashboard/summary",
-                  icon: <BarChartOutlined />,
-                  label: <Link href="/dashboard/summary">Summary</Link>,
-                },
-                {
-                  key: "/dashboard/users",
-                  icon: <TeamOutlined />,
-                  label: <Link href="/dashboard/users">Users</Link>,
-                },
-                {
-                  key: "/dashboard/products",
-                  icon: <BarsOutlined />,
-                  label: <Link href="/dashboard/products">Products</Link>,
-                },
-                {
-                  key: "/dashboard/categories",
-                  icon: <SnippetsOutlined />,
-                  label: <Link href="/dashboard/categories">Categories</Link>,
-                },
-                {
-                  key: "/dashboard/orders",
-                  icon: <FileTextOutlined />,
-                  label: <Link href="/dashboard/orders">Orders</Link>,
-                },
-              ],
-            },
-          ]}
-        />
 
-        <DashboardMobileHeader />
+        <div className="flex items-center justify-between w-full md:hidden">
+          <Menu
+            mode="horizontal"
+            style={{ flex: 1, minWidth: 0, border: "none" }}
+            defaultSelectedKeys={[pathname]}
+            items={[
+              {
+                key: "1",
+                label: "Dashboard",
+                icon: <MdDashboard />,
+                children: [
+                  {
+                    key: "/dashboard/summary",
+                    icon: <BarChartOutlined />,
+                    label: <Link href="/dashboard/summary">Summary</Link>,
+                  },
+                  {
+                    key: "/dashboard/users",
+                    icon: <TeamOutlined />,
+                    label: <Link href="/dashboard/users">Users</Link>,
+                  },
+                  {
+                    key: "/dashboard/products",
+                    icon: <BarsOutlined />,
+                    label: <Link href="/dashboard/products">Products</Link>,
+                  },
+                  {
+                    key: "/dashboard/categories",
+                    icon: <SnippetsOutlined />,
+                    label: <Link href="/dashboard/categories">Categories</Link>,
+                  },
+                  {
+                    key: "/dashboard/orders",
+                    icon: <FileTextOutlined />,
+                    label: <Link href="/dashboard/orders">Orders</Link>,
+                  },
+                ],
+              },
+            ]}
+          />
+
+          <DashboardMobileHeader />
+        </div>
+
+        <div className="hidden md:flex items-center justify-between w-full">
+          <Menu
+            mode="horizontal"
+            style={{ flex: 1, minWidth: 0, border: "none" }}
+            defaultSelectedKeys={[pathname]}
+            items={[
+              {
+                key: "/dashboard/summary",
+                icon: <BarChartOutlined />,
+                label: <Link href="/dashboard/summary">Summary</Link>,
+              },
+              {
+                key: "/dashboard/users",
+                icon: <TeamOutlined />,
+                label: <Link href="/dashboard/users">Users</Link>,
+              },
+              {
+                key: "/dashboard/products",
+                icon: <BarsOutlined />,
+                label: <Link href="/dashboard/products">Products</Link>,
+              },
+              {
+                key: "/dashboard/categories",
+                icon: <SnippetsOutlined />,
+                label: <Link href="/dashboard/categories">Categories</Link>,
+              },
+              {
+                key: "/dashboard/orders",
+                icon: <FileTextOutlined />,
+                label: <Link href="/dashboard/orders">Orders</Link>,
+              },
+            ]}
+          />
+
+          <DashboardMobileHeader />
+        </div>
       </Header>
       <Content className="min-h-full">
         <div

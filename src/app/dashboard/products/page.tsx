@@ -34,6 +34,7 @@ import { FaProductHunt } from "react-icons/fa6";
 import { dateFormater } from "@/utils/date-formater";
 import { getRandomColor } from "@/utils/radndom-color";
 import { getCategoryOptions } from "@/utils/get-categories";
+import { CreateProduct } from "@/components/drawers/create-product";
 
 const { Item } = Form;
 const { Text } = Typography;
@@ -51,6 +52,11 @@ const ProductPage = () => {
     perPage: PER_PAGE,
     currentPage: 1,
   });
+
+  // create product drawer
+  const [isCreateProductDrawerOpen, setCreateProductDrawerOpen] =
+    useState(false);
+  const createProductDrawerClose = () => setCreateProductDrawerOpen(false);
 
   // get categories
   useQuery({
@@ -187,6 +193,7 @@ const ProductPage = () => {
   return (
     <div className="w-full">
       {contextHolder}
+
       <Card title="Product Filters" style={{ marginBottom: 20 }}>
         <div className="grid grid-cols-4 gap-4 xl:justify-items-center">
           <Input
@@ -245,7 +252,7 @@ const ProductPage = () => {
               className="inline-block w-full"
               type="primary"
               icon={<PlusOutlined />}
-              onClick={() => {}}
+              onClick={() => setCreateProductDrawerOpen(true)}
             >
               Create Product
             </Button>
@@ -256,11 +263,12 @@ const ProductPage = () => {
               type="primary"
               shape="circle"
               icon={<PlusOutlined />}
-              onClick={() => {}}
+              onClick={() => setCreateProductDrawerOpen(true)}
             />
           </div>
         </div>
       </Card>
+
       <span className="font-bold text-active block mb-4">Products List</span>
       <Table
         bordered
@@ -279,6 +287,11 @@ const ProductPage = () => {
         loading={isLoading}
         rowKey="_id"
         className="overflow-x-auto bg-white"
+      />
+
+      <CreateProduct
+        onClose={createProductDrawerClose}
+        open={isCreateProductDrawerOpen}
       />
     </div>
   );
