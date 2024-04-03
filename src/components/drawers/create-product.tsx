@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Button,
   Card,
@@ -8,9 +8,11 @@ import {
   Drawer,
   Form,
   Input,
+  InputNumber,
   Row,
   Select,
   Space,
+  Switch,
   Typography,
   UploadFile,
   message,
@@ -21,13 +23,14 @@ import { AxiosError } from "axios";
 
 import { ErrorType, ICategory } from "@/types";
 
-import { createUser } from "@/api/client";
+import { createProduct, createUser } from "@/api/client";
 import { getsCategory } from "@/api/category";
 
 import { getCategoryOptionsWithCategory } from "@/utils/get-categories";
 import { UploadField } from "@/components/ui/upload-field";
 import { ProductPricing } from "@/components/product-pricing";
 import { ProductAttributes } from "@/components/product-attributes";
+import { getAttributes, getPriceConfiguration } from "@/utils";
 
 const { useForm, Item, useWatch } = Form;
 
@@ -38,6 +41,10 @@ interface CreateProductProps {
 
 export const CreateProduct = ({ onClose, open }: CreateProductProps) => {
   const [form] = useForm();
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => form.setFieldValue("isPublish", true), []);
+
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [context, contextHolder] = message.useMessage();
   const selectedCategory = useWatch("categoryId", form);
@@ -53,11 +60,11 @@ export const CreateProduct = ({ onClose, open }: CreateProductProps) => {
   // create product
   const { mutate, isLoading } = useMutation({
     mutationKey: ["create-product", form.getFieldValue],
-    mutationFn: (data: FormData) => createUser(data),
+    mutationFn: (data: FormData) => createProduct(data),
     onSuccess: () => {
       context.open({
         type: "success",
-        content: "User created successfully.",
+        content: "Product created successfully.",
         duration: 2,
       });
       form.resetFields();
@@ -76,7 +83,7 @@ export const CreateProduct = ({ onClose, open }: CreateProductProps) => {
     <>
       <Drawer
         onClose={onClose}
-        title="Create User"
+        title="Create Product"
         open={open}
         width={600}
         style={{ background: "#FAFAFA" }}
@@ -85,7 +92,36 @@ export const CreateProduct = ({ onClose, open }: CreateProductProps) => {
         <Form
           layout="vertical"
           onFinish={(data) => {
-            console.log(data);
+            if (!fileList.length) {
+              return context.open({
+                type: "error",
+                content: "Please upload product image!",
+                duration: 2,
+              });
+            }
+
+            const category = JSON.parse(data.categoryId) as ICategory;
+            const formData = new FormData();
+
+            formData.append("image", fileList[0].originFileObj as File);
+            formData.append("name", data.name);
+            formData.append("description", data.description);
+            formData.append("categoryId", category._id);
+            formData.append("discount", data.discount);
+            formData.append("preparationTime", data.preparationTime);
+            formData.append("isPublish", data.isPublish);
+
+            formData.append(
+              "attributes",
+              JSON.stringify(getAttributes(data.attributes))
+            );
+
+            formData.append(
+              "priceConfiguration",
+              JSON.stringify(getPriceConfiguration(data.priceConfiguration))
+            );
+
+            mutate(formData);
           }}
           form={form}
         >
@@ -166,6 +202,51 @@ export const CreateProduct = ({ onClose, open }: CreateProductProps) => {
               {selectedCategory && (
                 <ProductAttributes selectedCategory={selectedCategory} />
               )}
+
+              <Card title={<Typography.Text>Metadata</Typography.Text>}>
+                <Row gutter={24}>
+                  <Col span={8}>
+                    <Item
+                      name="discount"
+                      label="Discount"
+                      rules={[
+                        {
+                          required: true,
+                          message: "Product discount required!",
+                        },
+                      ]}
+                    >
+                      <InputNumber addonAfter="₹" />
+                    </Item>
+                  </Col>
+
+                  <Col span={8}>
+                    <Item
+                      name="preparationTime"
+                      label="Preparation Time"
+                      rules={[
+                        {
+                          required: true,
+                          message: "Product preparation time required!",
+                        },
+                      ]}
+                    >
+                      <InputNumber addonAfter="min" />
+                    </Item>
+                  </Col>
+
+                  <Col span={8}>
+                    <Item label="Published" name="isPublish">
+                      <Switch
+                        defaultChecked
+                        onChange={(value) =>
+                          form.setFieldValue("isPublish", value)
+                        }
+                      />
+                    </Item>
+                  </Col>
+                </Row>
+              </Card>
             </Space>
           </Row>
 

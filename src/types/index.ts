@@ -152,13 +152,15 @@ export interface IAttributeForProduct {
   value: string;
 }
 
-export interface IPriceConfigurationForProduct {
-  [key: string]: {
-    priceType: "base" | "aditional";
-    availableOptions: {
-      [key: string]: number;
-    };
+export interface IPriceConfigurationValue {
+  priceType: "base" | "aditional";
+  availableOptions: {
+    [key: string]: number;
   };
+}
+
+export interface IPriceConfigurationForProduct {
+  [key: string]: IPriceConfigurationValue;
 }
 
 export interface IProductBody {

@@ -10,7 +10,7 @@ import {
   UserAddOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { Button, Input, Table, message, Avatar, Tag, Card } from "antd";
+import { Button, Input, Table, message, Avatar, Tag, Card, Form } from "antd";
 import type { ColumnsType } from "antd/es/table";
 
 import { deleteUser, getUsers } from "@/api/auth";
@@ -223,7 +223,7 @@ const UserPage = () => {
       {contextHolder}
       <Card title="User Filters" style={{ marginBottom: 20 }}>
         <div className="space-x-4 flex items-center justify-between">
-          <div className="flex-center">
+          <Form className="flex-center">
             <Input
               allowClear
               placeholder="Search user"
@@ -233,7 +233,7 @@ const UserPage = () => {
                 setQueryParams((prev) => ({ ...prev, q: e.target.value }));
               }, 500)}
             />
-          </div>
+          </Form>
 
           <div className="hidden sm:block">
             <Button

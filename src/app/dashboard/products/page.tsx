@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery } from "react-query";
+import { useMutation, useQuery } from "react-query";
 import debounce from "debounce";
 
 import {
   Avatar,
   Button,
   Card,
+  Drawer,
   Form,
   Input,
   Select,
@@ -15,16 +16,15 @@ import {
   Switch,
   Table,
   Tag,
-  Typography,
   message,
 } from "antd";
 import { SearchOutlined, PlusOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 
-import { getProducts } from "@/api/product";
+import { deleteProduct, getProducts } from "@/api/product";
 import { getsCategory } from "@/api/category";
 
-import { IAttribute, ICategory, IProduct } from "@/types";
+import { ErrorType, IAttribute, ICategory, IProduct } from "@/types";
 import { TableTitle } from "@/components/ui/table-title";
 
 import { MdOutlineDelete } from "react-icons/md";
@@ -35,11 +35,12 @@ import { dateFormater } from "@/utils/date-formater";
 import { getRandomColor } from "@/utils/radndom-color";
 import { getCategoryOptions } from "@/utils/get-categories";
 import { CreateProduct } from "@/components/drawers/create-product";
+import { AxiosError } from "axios";
+import { EditProduct } from "@/components/drawers/edit-product";
 
 const { Item } = Form;
-const { Text } = Typography;
 
-const PER_PAGE = 6;
+const PER_PAGE = 5;
 
 const ProductPage = () => {
   const [context, contextHolder] = message.useMessage();
@@ -52,6 +53,11 @@ const ProductPage = () => {
     perPage: PER_PAGE,
     currentPage: 1,
   });
+
+  // edit product drawer
+  const [isEditProductDrawerOpen, setEditProductDrawerOpen] = useState(false);
+  const [editProductId, setEditProductId] = useState<string>("");
+  const editProductDrawerClose = () => setEditProductDrawerOpen(false);
 
   // create product drawer
   const [isCreateProductDrawerOpen, setCreateProductDrawerOpen] =
@@ -78,6 +84,32 @@ const ProductPage = () => {
       setProduct(data.products);
     },
   });
+
+  // delete product
+  const { mutate, isLoading: isPending } = useMutation({
+    mutationKey: ["delete-product", Date.now()],
+    mutationFn: async (productId: string) => deleteProduct(productId),
+    onSuccess: async () => handleOnSuccess(),
+    onError: async (err: AxiosError) => handleOnError(err),
+  });
+
+  const handleOnSuccess = () => {
+    context.open({
+      type: "success",
+      content: "User deleted successfully.",
+      duration: 2,
+    });
+    refetch();
+  };
+
+  const handleOnError = (err: AxiosError) => {
+    const errors = err.response?.data as unknown as ErrorType;
+    context.open({
+      type: "error",
+      content: errors.error[0].msg,
+      duration: 2,
+    });
+  };
 
   // product table
   const ProductTable: ColumnsType<IProduct> = [
@@ -111,7 +143,6 @@ const ProductPage = () => {
       dataIndex: "name",
       key: "name",
     },
-
     {
       title: <TableTitle title="Category" />,
       dataIndex: "category.name",
@@ -119,6 +150,18 @@ const ProductPage = () => {
       render: (_, record) => (
         <Tag color={getRandomColor()}>{record.category.name}</Tag>
       ),
+    },
+    {
+      title: <TableTitle title="Discount" />,
+      dataIndex: "discount",
+      key: "discount",
+      render: (discount) => <span>{discount}%</span>,
+    },
+    {
+      title: <TableTitle title="Prep. Time" />,
+      dataIndex: "preparationTime",
+      key: "time",
+      render: (time) => <span>{time} min</span>,
     },
     {
       title: <TableTitle title="Status" />,
@@ -161,6 +204,10 @@ const ProductPage = () => {
                 outline: "none",
                 boxShadow: "none",
               }}
+              onClick={() => {
+                setEditProductId(record._id);
+                setEditProductDrawerOpen(true);
+              }}
               icon={
                 <TiEdit className="text-green-300 hover:text-green-500 size-4 transition-all" />
               }
@@ -173,6 +220,7 @@ const ProductPage = () => {
                 outline: "none",
                 boxShadow: "none",
               }}
+              onClick={() => mutate(record._id)}
               icon={
                 <MdOutlineDelete className="text-red-300 hover:text-red-500 size-4 transition-all" />
               }
@@ -195,7 +243,7 @@ const ProductPage = () => {
       {contextHolder}
 
       <Card title="Product Filters" style={{ marginBottom: 20 }}>
-        <div className="grid grid-cols-4 gap-4 xl:justify-items-center">
+        <Form className="grid grid-cols-4 gap-4 xl:justify-items-center">
           <Input
             className="col-span-3 xl:col-span-1"
             allowClear
@@ -232,14 +280,14 @@ const ProductPage = () => {
           >
             <Select
               allowClear
-              onChange={(value) =>
+              onChange={(value) => {
                 setQueryParams((prev) => {
                   return {
                     ...prev,
                     category: value,
                   };
-                })
-              }
+                });
+              }}
               placeholder={"filter category"}
               style={{ width: "100%" }}
               options={getCategoryOptions(category)}
@@ -266,7 +314,7 @@ const ProductPage = () => {
               onClick={() => setCreateProductDrawerOpen(true)}
             />
           </div>
-        </div>
+        </Form>
       </Card>
 
       <span className="font-bold text-active block mb-4">Products List</span>
@@ -293,6 +341,16 @@ const ProductPage = () => {
         onClose={createProductDrawerClose}
         open={isCreateProductDrawerOpen}
       />
+
+      <Drawer
+        onClose={editProductDrawerClose}
+        title="Edit Product"
+        open={isEditProductDrawerOpen}
+        width={600}
+        style={{ background: "#FAFAFA" }}
+      >
+        <EditProduct productId={editProductId} />
+      </Drawer>
     </div>
   );
 };

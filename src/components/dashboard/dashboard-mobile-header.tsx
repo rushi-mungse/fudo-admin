@@ -18,7 +18,6 @@ export const DashboardMobileHeader = () => {
   const showDrawer = () => setOpen(true);
   const onClose = () => setOpen(false);
   const pathname = usePathname();
-
   const { auth } = useAuthStore((state) => state);
 
   return (

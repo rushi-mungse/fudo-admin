@@ -13,7 +13,7 @@ export const ProductAttributes = ({ selectedCategory }: AttributesProps) => {
   if (!category) {
     return null;
   }
-  console.log(category);
+
   return (
     <Card
       title={<Typography.Text>Attributes</Typography.Text>}

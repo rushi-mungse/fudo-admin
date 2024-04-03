@@ -1,5 +1,6 @@
 import { ICategory } from "@/types";
 import { Card, Col, Form, InputNumber, Row, Space, Typography } from "antd";
+const { Item } = Form;
 
 type PricingProps = {
   selectedCategory: string;
@@ -32,8 +33,7 @@ export const ProductPricing = ({ selectedCategory }: PricingProps) => {
                   {configurationValue.availableOptions.map((option: string) => {
                     return (
                       <Col span={8} key={option}>
-                        <Form.Item
-                          label={option}
+                        <Item
                           name={[
                             "priceConfiguration",
                             JSON.stringify({
@@ -42,9 +42,16 @@ export const ProductPricing = ({ selectedCategory }: PricingProps) => {
                             }),
                             option,
                           ]}
+                          rules={[
+                            {
+                              required: true,
+                              message: "Product price required!",
+                            },
+                          ]}
+                          label={option}
                         >
                           <InputNumber addonAfter="₹" />
-                        </Form.Item>
+                        </Item>
                       </Col>
                     );
                   })}

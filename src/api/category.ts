@@ -11,3 +11,6 @@ export const putCategory = (data: IUpdateCategory, categoryId: string) =>
 
 export const deleteCategory = (categoryId: string) =>
   api.delete(`/category/${categoryId}`);
+
+export const getCategoryByName = (categoryName: string) =>
+  api.get(`/category/${categoryName}`);
