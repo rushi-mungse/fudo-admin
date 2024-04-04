@@ -9,6 +9,7 @@ import { FaShippingFast } from "react-icons/fa";
 import { GiHotMeal } from "react-icons/gi";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { FeaturedProducts } from "@/components/featured-products";
 
 const HomePage = () => {
   return (
@@ -61,6 +62,9 @@ const HomePage = () => {
           </Section>
         </div>
       </main>
+
+      <FeaturedProducts />
+
       <SiteFooter />
     </div>
   );
