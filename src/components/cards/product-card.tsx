@@ -17,67 +17,106 @@ const { Group } = Radio;
 interface IPriceType {
   label: string;
   value: number;
+  name: string;
 }
 interface IPrices {
   name: string;
-  defaultValue: number;
+  defaultValue: {
+    price: number;
+    name: string;
+  };
   priceType: "base" | "aditional";
   prices: IPriceType[];
 }
 
-export const getDefaultValue = (data: IPriceConfigurationValue): number => {
+export const getDefaultValue = (
+  data: IPriceConfigurationValue
+): [number, string] => {
   let result: number = 1e9;
+  let priceKey: string = "";
+
   Object.entries(data.availableOptions).map(
     ([key, value]: [string, number]) => {
-      result = Math.min(result, value);
+      if (value < result) {
+        priceKey = key;
+        result = value;
+      }
+      return;
     }
   );
 
-  return result;
+  return [result, priceKey];
 };
 
-export const getPrices = (data: IPriceConfigurationForProduct): IPrices[] => {
+export const getPrices = (
+  data: IPriceConfigurationForProduct
+): [IPrices[], IPriceConfiguration, number] => {
   let result: IPrices[] = [];
+  let obj: IPriceConfiguration = {};
+  let total = 0;
 
   Object.entries(data).map(
     ([configurationKey, value]: [string, IPriceConfigurationValue]) => {
+      const defaultVal: [number, string] = getDefaultValue(value);
+      obj[configurationKey] = {
+        name: defaultVal[1],
+        value: defaultVal[0],
+      };
+      total += defaultVal[0];
+
       result.push({
         priceType: value.priceType,
         name: configurationKey,
-        defaultValue: getDefaultValue(value),
+        defaultValue: {
+          name: defaultVal[1],
+          price: defaultVal[0],
+        },
         prices: Object.entries(value.availableOptions).map(
           ([key, val]: [string, Number]) => {
             return {
               label: key,
               value: val,
+              name: key,
             } as IPriceType;
           }
         ),
       });
+      return;
     }
   );
 
-  return result;
+  return [result, obj, total];
 };
+
+interface IPriceConfiguration {
+  [key: string]: {
+    name: string;
+    value: number;
+  };
+}
 
 export const ProductCard = ({ product }: { product: IProduct }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+
   const showModal = () => setIsModalOpen(true);
   const handleCancel = () => setIsModalOpen(false);
-  const [totalPrice, setTotalPrice] = useState<number>(0);
+
+  const data = getPrices(product.priceConfiguration);
+  const prices = data[0];
+
+  const [priceConfiguration, setPriceConfiguration] =
+    useState<IPriceConfiguration>(data[1]);
+  const [totalPrice, setTotalPrice] = useState<number>(data[2]);
 
   return (
     <>
       <Modal
-        width={600}
+        width={700}
         open={isModalOpen}
         onCancel={handleCancel}
         footer={[
           <Button key="totalPrice" type="text">
             ₹ {totalPrice}
-          </Button>,
-          <Button key="close" onClick={() => handleCancel()}>
-            Close
           </Button>,
           <Button
             key="addToCart"
@@ -88,21 +127,25 @@ export const ProductCard = ({ product }: { product: IProduct }) => {
           </Button>,
         ]}
       >
-        <div className="flex items-center justify-center flex-col sm:grid grid-cols-2 mb-2">
-          <div className="flex items-center justify-center col-span-1">
+        <div className="flex items-center justify-center flex-col sm:grid grid-cols-6 border-b border-n-6">
+          <div className="flex items-center justify-center col-span-2 border-n-6">
             <Avatar src={product.image} size={200}></Avatar>
           </div>
 
-          <div className="py-5 sm:py-0 col-span-1">
+          <div className="py-5 col-span-4 sm:border-l sm:border-n-6 pl-4">
             <div>
               <h1 className="font-bold tracking-wider text-lg">
                 {product.name}
               </h1>
               <p className="text-n-4">{product.description}</p>
+
+              <div className="mt-2">
+                <Tag>{product.category.name}</Tag>
+              </div>
             </div>
 
             <div className="space-y-10 mt-4">
-              {getPrices(product.priceConfiguration).map((prices: IPrices) => (
+              {prices.map((prices: IPrices) => (
                 <div key={prices.name}>
                   <h1 className="text-sm font-semibold pb-2">
                     Choose the {prices.name.toLowerCase()}
@@ -110,13 +153,45 @@ export const ProductCard = ({ product }: { product: IProduct }) => {
 
                   <Group
                     onChange={(value) => {
-                      setTotalPrice((prev) => prev + value.target.value);
+                      const data = JSON.parse(value.target.value) as {
+                        name: string;
+                        price: number;
+                      };
+                      const prevVlaue = priceConfiguration[prices.name].value;
+                      setTotalPrice((prev) => prev - prevVlaue + data.price);
+                      setPriceConfiguration((prev) => ({
+                        ...prev,
+                        [prices.name]: {
+                          name: data.name,
+                          value: data.price,
+                        },
+                      }));
                     }}
-                    options={prices.prices}
-                    defaultValue={prices.defaultValue}
+                    defaultValue={JSON.stringify(prices.defaultValue)}
                     optionType="button"
                     buttonStyle="solid"
-                  />
+                  >
+                    {prices.prices.map((price) => {
+                      return (
+                        <Radio.Button
+                          value={JSON.stringify({
+                            name: price.name,
+                            price: price.value,
+                          })}
+                          style={{
+                            height: 45,
+                          }}
+                          name={price.name}
+                          key={price.name}
+                        >
+                          <div className="flex flex-col space-y-1">
+                            <span className="text-sm"> {price.label}</span>
+                            <span className="text-xs">₹ {price.value}</span>
+                          </div>
+                        </Radio.Button>
+                      );
+                    })}
+                  </Group>
                 </div>
               ))}
             </div>
@@ -163,7 +238,7 @@ export const ProductCard = ({ product }: { product: IProduct }) => {
 
               <div className="flex items-center justify-between w-full px-6 mt-3">
                 <span className="text-sm font-semibold border px-4 py-1 rounded-full">
-                  From ₹ 100
+                  From ₹ {prices[0].defaultValue.price}
                 </span>
                 <button
                   className="rounded-full border bg-active/40 px-4 py-1 text-sm hover:bg-active/60 transition-all"
