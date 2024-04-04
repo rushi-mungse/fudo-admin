@@ -187,12 +187,14 @@ export const CreateProduct = ({ onClose, open }: CreateProductProps) => {
               </Card>
 
               <Card title={<Typography.Text>Product Image</Typography.Text>}>
-                <UploadField
-                  fileSize={1}
-                  fileList={fileList}
-                  setFileList={setFileList}
-                  listType="picture"
-                />
+                <Item>
+                  <UploadField
+                    fileSize={1}
+                    fileList={fileList}
+                    setFileList={setFileList}
+                    listType="picture"
+                  />
+                </Item>
               </Card>
 
               {selectedCategory && (

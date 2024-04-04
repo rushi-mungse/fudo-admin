@@ -1,15 +1,16 @@
 "use client";
 
+import { message } from "antd";
+import { useState } from "react";
+import { useQuery } from "react-query";
+
 import { getProducts } from "@/api/product";
+import { IProduct } from "@/types";
+
 import { ProductCard } from "@/components/cards/product-card";
+import { Loader } from "@/components/loader";
 import { Heading } from "@/components/ui/heading";
 import { Section } from "@/components/ui/section";
-import { ErrorType, IProduct } from "@/types";
-import { message } from "antd";
-import { AxiosError } from "axios";
-import { useState } from "react";
-import InfiniteScroll from "react-infinite-scroll-component";
-import { useQuery } from "react-query";
 
 const PER_PAGE = 6;
 
@@ -25,7 +26,7 @@ const ProductPage = () => {
   });
 
   // get products
-  const { isLoading, refetch, isError } = useQuery({
+  const { isLoading } = useQuery({
     queryKey: ["get-products", queryParams],
     queryFn: async () => {
       const data = queryParams as unknown as Record<string, string>;
@@ -38,24 +39,6 @@ const ProductPage = () => {
     },
   });
 
-  const handleOnSuccess = () => {
-    context.open({
-      type: "success",
-      content: "User deleted successfully.",
-      duration: 2,
-    });
-    refetch();
-  };
-
-  const handleOnError = (err: AxiosError) => {
-    const errors = err.response?.data as unknown as ErrorType;
-    context.open({
-      type: "error",
-      content: errors.error[0].msg,
-      duration: 2,
-    });
-  };
-
   return (
     <main className="overflow-hidden">
       <Section>
@@ -67,11 +50,17 @@ const ProductPage = () => {
             />
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {product.map((product) => (
-              <ProductCard product={product} key={product._id} />
-            ))}
-          </div>
+          {isLoading ? (
+            <div className="flex items-center justify-center">
+              <Loader />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+              {product.map((product) => (
+                <ProductCard product={product} key={product._id} />
+              ))}
+            </div>
+          )}
         </div>
       </Section>
     </main>

@@ -16,7 +16,7 @@ const HomePage = () => {
     <div className="bg-background relative flex min-h-screen flex-col">
       <SiteHeader />
       <main className="flex-1">
-        <div className="relative overflow-hidden min-h-screen">
+        <div className="relative overflow-hidden">
           <Section>
             <div className="container w-[90%] mx-auto relative">
               <div className="relative">
