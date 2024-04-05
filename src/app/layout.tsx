@@ -5,6 +5,7 @@ import "@/styles/globals.css";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
 import { ReactQueryProvider } from "@/components/react-query-provider";
 import { RefreshComponent } from "@/components/refresh-component";
+import { SetCart } from "@/components/set-cart";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,6 +22,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className} suppressHydrationWarning={true}>
+        <SetCart />
         <AntdRegistry>
           <ReactQueryProvider>
             <RefreshComponent>{children}</RefreshComponent>

@@ -1,4 +1,4 @@
-import { IOtpInfo, IUser } from "@/types";
+import { ICart, IOtpInfo, IUser } from "@/types";
 import { create } from "zustand";
 
 export type AuthStoreState = {
@@ -20,7 +20,7 @@ export const useAuthStore = create<AuthStoreState & AuthStoreAction>()(
       user: null,
     },
     setAuth: (user: IUser) =>
-      set((state) => ({
+      set(() => ({
         auth: {
           isAuth: true,
           user,
@@ -55,4 +55,77 @@ export const useOtpStore = create<OtpStoreState & OtpStoreAction>()((set) => ({
     set(() => ({
       otpInfo: null,
     })),
+}));
+
+export interface CartStoreState {
+  cart: ICart;
+}
+
+export interface IPriceConfig {
+  [key: string]: string;
+}
+
+export interface CartStoreAction {
+  addToCart: (
+    productId: string,
+    priceConfiguration: string,
+    config: IPriceConfig
+  ) => void;
+  setCart: (cart: ICart) => void;
+  removeToCart: (productId: string, priceConfiguration: string) => void;
+  decQuantity: (productId: string, priceConfiguration: string) => void;
+  deleteCart: () => void;
+}
+
+export const useCart = create<CartStoreState & CartStoreAction>()((set) => ({
+  cart: {
+    items: null,
+    totalItems: 0,
+  },
+  setCart: (cart: ICart) =>
+    set(() => ({
+      cart,
+    })),
+
+  addToCart: (
+    productId: string,
+    priceConfiguration: string,
+    config: IPriceConfig
+  ) =>
+    set((state) => {
+      if (!state.cart.items) {
+        state.cart.items = {};
+      }
+
+      if (!state.cart.items[productId])
+        state.cart.items[productId] = {
+          [priceConfiguration]: {
+            quantity: "0",
+            ...config,
+          },
+        };
+
+      if (!state.cart.items[productId][priceConfiguration]) {
+        state.cart.items[productId][priceConfiguration] = {
+          quantity: "0",
+          ...config,
+        };
+      }
+
+      state.cart.items[productId][priceConfiguration]["quantity"] = (
+        +state.cart.items[productId][priceConfiguration]["quantity"] + 1
+      ).toString();
+
+      state.cart.totalItems += 1;
+      window.localStorage.setItem("cart", JSON.stringify(state.cart));
+      return state;
+    }),
+
+  removeToCart: (productId: string, priceConfiguration: string) =>
+    set(() => ({})),
+
+  decQuantity: (productId: string, priceConfiguration: string) =>
+    set(() => ({})),
+
+  deleteCart: () => set(() => ({})),
 }));

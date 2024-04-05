@@ -6,14 +6,17 @@ import { getProducts } from "@/api/product";
 import { Loader } from "@/components/loader";
 import { IProduct } from "@/types";
 import { ProductCard } from "./cards/product-card";
+import { useState } from "react";
 
 export const FeaturedProducts = () => {
-  const { data, isLoading } = useQuery({
+  const [products, setProducts] = useState<IProduct[]>();
+  const { isLoading } = useQuery({
     queryKey: ["featured-products"],
     queryFn: () => getProducts(`currentPage=1&perPage=6`),
+    onSuccess: ({ data }) => setProducts(data.products),
   });
 
-  if (isLoading)
+  if (isLoading || !products)
     return (
       <div className="flex items-center justify-center h-[300px]">
         <Loader />
@@ -27,7 +30,7 @@ export const FeaturedProducts = () => {
         <p className="text-n-4">🔥 Top best seller products</p>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 my-10">
-        {data?.data.products.map((product: IProduct) => (
+        {products.map((product: IProduct) => (
           <ProductCard product={product} key={product._id} />
         ))}
       </div>

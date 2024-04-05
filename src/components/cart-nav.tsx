@@ -1,8 +1,19 @@
-import { CartIcon } from "@/icons/cart";
-import { cn } from "@/lib/utils";
+"use client";
 import Link from "next/link";
 
+import { CartIcon } from "@/icons/cart";
+import { useCart } from "@/lib/store";
+import { cn } from "@/lib/utils";
+import { useEffect, useState } from "react";
+
 export const CartNav = ({ isActive = false }: { isActive?: boolean }) => {
+  const { cart } = useCart((state) => state);
+  const [totalItems, setTotalItems] = useState<number>(0);
+
+  useEffect(() => {
+    setTotalItems(cart.totalItems);
+  }, [cart.totalItems]);
+
   return (
     <Link href="/cart" className="group">
       <div
@@ -23,7 +34,7 @@ export const CartNav = ({ isActive = false }: { isActive?: boolean }) => {
             isActive && "text-active"
           )}
         >
-          10
+          {totalItems}
         </p>
       </div>
     </Link>

@@ -2,13 +2,14 @@
 
 import { Button } from "antd";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+
+import { useAuthStore } from "@/lib/store";
+import { cn } from "@/lib/utils";
+import { navConfig } from "@/config/nav";
 
 import { LogoLink } from "@/components/logo-link";
 import { CartNav } from "@/components/cart-nav";
-import { cn } from "@/lib/utils";
-import { usePathname } from "next/navigation";
-import { navConfig } from "@/config/nav";
-import { useAuthStore } from "@/lib/store";
 
 import { RxDashboard } from "react-icons/rx";
 

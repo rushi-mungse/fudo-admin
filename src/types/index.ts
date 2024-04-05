@@ -187,3 +187,34 @@ export interface IProduct {
   attributes: IAttributeForProduct[];
   priceConfiguration: IPriceConfigurationForProduct;
 }
+
+/*
+{
+  cart : {
+    productId : {
+      'Small' + 'Thin': {
+        quantity: number,
+        size : 'Small'
+        crust : 'Large'
+      },
+    }
+    
+  }
+}
+*/
+
+export interface IItemInfo {
+  [key: string]: string;
+}
+export interface IItem {
+  [key: string]: IItemInfo;
+}
+
+export interface ICartItems {
+  [key: string]: IItem;
+}
+
+export interface ICart {
+  items: ICartItems | null;
+  totalItems: number;
+}

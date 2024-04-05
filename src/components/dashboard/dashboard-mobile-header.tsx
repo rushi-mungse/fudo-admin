@@ -5,20 +5,33 @@ import React, { useState } from "react";
 import { usePathname } from "next/navigation";
 
 import { Avatar, Button, Drawer, Typography } from "antd";
-import { MenuOutlined, CloseOutlined } from "@ant-design/icons";
+import { MenuOutlined, CloseOutlined, LogoutOutlined } from "@ant-design/icons";
 
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/lib/store";
 import { dashboardNavConfig } from "@/config/dashboard-nav";
+import { useMutation } from "react-query";
+import { logout } from "@/api/auth";
+import { useRouter } from "next/navigation";
 
 const { Text } = Typography;
 
 export const DashboardMobileHeader = () => {
+  const { auth } = useAuthStore((state) => state);
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const router = useRouter();
+
   const showDrawer = () => setOpen(true);
   const onClose = () => setOpen(false);
-  const pathname = usePathname();
-  const { auth } = useAuthStore((state) => state);
+
+  const { mutate, isLoading } = useMutation({
+    mutationKey: ["logout"],
+    mutationFn: () => logout(),
+    onSuccess: () => {
+      router.push("/auth/login");
+    },
+  });
 
   return (
     <div className="flex items-center justify-center">
@@ -52,6 +65,16 @@ export const DashboardMobileHeader = () => {
                   {nav.title}
                 </Link>
               )
+          )}
+
+          {auth.isAuth && (
+            <Button
+              icon={<LogoutOutlined />}
+              onClick={() => mutate()}
+              loading={isLoading}
+            >
+              Logout
+            </Button>
           )}
         </div>
       </Drawer>

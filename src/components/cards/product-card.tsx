@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Avatar, Button, Space, Tag, Modal, Radio } from "antd";
+import { Avatar, Button, Space, Tag, Modal, Radio, message } from "antd";
 import { ShoppingCartOutlined } from "@ant-design/icons";
 
 import {
@@ -11,6 +11,7 @@ import {
   IProduct,
 } from "@/types";
 import { getRandomColor } from "@/utils/radndom-color";
+import { useCart } from "@/lib/store";
 
 const { Group } = Radio;
 
@@ -88,15 +89,38 @@ export const getPrices = (
   return [result, obj, total];
 };
 
-interface IPriceConfiguration {
-  [key: string]: {
-    name: string;
-    value: number;
-  };
+interface PriceConfigurationValue {
+  name: string;
+  value: number;
 }
+interface IPriceConfiguration {
+  [key: string]: PriceConfigurationValue;
+}
+
+interface Obj {
+  [key: string]: string;
+}
+
+export const getPriceConfig = (
+  priceConfiguration: IPriceConfiguration
+): [string, Obj] => {
+  let priceConfigStr: string = "";
+  let result: Obj = {};
+
+  Object.entries(priceConfiguration).map(
+    ([key, value]: [string, PriceConfigurationValue]) => {
+      priceConfigStr += value.name;
+      result[key] = value.name;
+      return;
+    }
+  );
+
+  return [priceConfigStr, result];
+};
 
 export const ProductCard = ({ product }: { product: IProduct }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [context, contextHolder] = message.useMessage();
 
   const showModal = () => setIsModalOpen(true);
   const handleCancel = () => setIsModalOpen(false);
@@ -107,6 +131,19 @@ export const ProductCard = ({ product }: { product: IProduct }) => {
   const [priceConfiguration, setPriceConfiguration] =
     useState<IPriceConfiguration>(data[1]);
   const [totalPrice, setTotalPrice] = useState<number>(data[2]);
+  const { addToCart } = useCart((state) => state);
+
+  const handleAddToCart = () => {
+    const data = getPriceConfig(priceConfiguration);
+    addToCart(product._id, data[0], data[1]);
+    context.open({
+      type: "success",
+      content: "Product added successfully.",
+      duration: 2,
+    });
+
+    handleCancel();
+  };
 
   return (
     <>
@@ -122,17 +159,19 @@ export const ProductCard = ({ product }: { product: IProduct }) => {
             key="addToCart"
             type="primary"
             icon={<ShoppingCartOutlined />}
+            onClick={handleAddToCart}
           >
             Add To Cart
           </Button>,
         ]}
       >
-        <div className="flex items-center justify-center flex-col sm:grid grid-cols-6 border-b border-n-6">
+        <div className="flex items-center justify-center flex-col sm:grid grid-cols-6 border-b">
+          {contextHolder}
           <div className="flex items-center justify-center col-span-2 border-n-6">
             <Avatar src={product.image} size={200}></Avatar>
           </div>
 
-          <div className="py-5 col-span-4 sm:border-l sm:border-n-6 pl-4">
+          <div className="py-5 col-span-4 sm:border-l pl-4">
             <div>
               <h1 className="font-bold tracking-wider text-lg">
                 {product.name}
@@ -200,9 +239,11 @@ export const ProductCard = ({ product }: { product: IProduct }) => {
       </Modal>
 
       <div className="relative border rounded-lg">
-        <div className="absolute bg-active/40 rounded-[50%] h-10 w-10 top-2 right-2 flex items-center justify-center flex-col">
-          <span className="text-xs text-pure">{product.discount}%</span>
-          <span className="text-[8px] text-pure">Off</span>
+        <div className="absolute bg-white sm:bg-active rounded-[50%] h-10 w-10 top-2 right-2 flex items-center justify-center flex-col">
+          <span className="text-xs sm:text-white text-black">
+            {product.discount}%
+          </span>
+          <span className="text-[8px] sm:text-white text-black">Off</span>
         </div>
 
         <div className="grid flex flex-col sm:grid-cols-2">
