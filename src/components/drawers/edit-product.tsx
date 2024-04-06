@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import {
+  Avatar,
   Button,
   Card,
   Col,
@@ -37,20 +38,29 @@ import {
   getPriceConfiguration,
   getPriceConfigurationInitialValue,
 } from "@/utils";
-import { getProduct } from "@/api/product";
 import { Loader } from "../loader";
 
 const { useForm, Item, useWatch } = Form;
 
-export const EditProduct = ({ productId }: { productId: string }) => {
+export const EditProduct = ({ product }: { product: IProduct }) => {
   const [form] = useForm();
 
   const getCategoryId = (categoryName: string) => {
     return category.filter((category) => category.name === categoryName);
   };
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => form.setFieldValue("isPublish", true), []);
+  useEffect(() => {
+    form.setFieldsValue({
+      ...product,
+      categoryId: product?.category.name,
+      ...{
+        priceConfiguration: getPriceConfigurationInitialValue(
+          product.priceConfiguration
+        ),
+      },
+      ...{ attributes: getAttributesInitialValue(product.attributes) },
+    });
+  }, [product]);
 
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [context, contextHolder] = message.useMessage();
@@ -64,30 +74,16 @@ export const EditProduct = ({ productId }: { productId: string }) => {
     onSuccess: ({ data }) => setCagegory(data.categories),
   });
 
-  // get product
-  const [product, setProduct] = useState<IProduct>();
-  const { refetch } = useQuery({
-    queryKey: ["get-product", productId],
-    queryFn: async () => getProduct(productId),
-    onSuccess: ({ data }) => setProduct(data.product),
-  });
-
-  useEffect(() => {
-    refetch();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [productId]);
-
   // edit product
   const { mutate, isLoading } = useMutation({
     mutationKey: ["edit-product", form.getFieldValue],
-    mutationFn: (data: FormData) => updateProduct(data, productId),
+    mutationFn: (data: FormData) => updateProduct(data, product?._id),
     onSuccess: () => {
       context.open({
         type: "success",
         content: "Product updated successfully.",
         duration: 2,
       });
-      form.resetFields();
     },
     onError: (err: AxiosError) => {
       const errors = err.response?.data as unknown as ErrorType;
@@ -109,42 +105,24 @@ export const EditProduct = ({ productId }: { productId: string }) => {
         onFinish={(data) => {
           const formData = new FormData();
 
-          if (fileList.length) {
+          if (fileList.length)
             formData.append("image", fileList[0].originFileObj as File);
-          }
-
           const categoryId = getCategoryId(data.categoryId)[0]._id;
-
-          // console.log(data);
-
           formData.append("name", data.name);
           formData.append("description", data.description);
           formData.append("categoryId", categoryId);
           formData.append("discount", data.discount);
           formData.append("preparationTime", data.preparationTime);
           formData.append("isPublish", data.isPublish);
-
           formData.append(
             "attributes",
             JSON.stringify(getAttributes(data.attributes))
           );
-
           formData.append(
             "priceConfiguration",
             JSON.stringify(getPriceConfiguration(data.priceConfiguration))
           );
-
           mutate(formData);
-        }}
-        initialValues={{
-          ...product,
-          categoryId: product?.category.name,
-          ...{
-            priceConfiguration: getPriceConfigurationInitialValue(
-              product.priceConfiguration
-            ),
-          },
-          ...{ attributes: getAttributesInitialValue(product.attributes) },
         }}
         form={form}
       >
@@ -212,12 +190,15 @@ export const EditProduct = ({ productId }: { productId: string }) => {
             </Card>
 
             <Card title={<Typography.Text>Product Image</Typography.Text>}>
-              <UploadField
-                fileSize={1}
-                fileList={fileList}
-                setFileList={setFileList}
-                listType="picture"
-              />
+              <div className="flex items-center space-x-3">
+                <Avatar src={product.image} size={150} />
+                <UploadField
+                  fileSize={1}
+                  fileList={fileList}
+                  setFileList={setFileList}
+                  listType="picture"
+                />
+              </div>
             </Card>
 
             {selectedCategory && (
@@ -293,7 +274,13 @@ export const PricingConfiguration = ({
 
   if (isLoading)
     return (
-      <Card>
+      <Card
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
         <Loader />;
       </Card>
     );

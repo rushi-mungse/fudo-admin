@@ -56,7 +56,7 @@ const ProductPage = () => {
 
   // edit product drawer
   const [isEditProductDrawerOpen, setEditProductDrawerOpen] = useState(false);
-  const [editProductId, setEditProductId] = useState<string>("");
+  const [editProduct, setEditProduct] = useState<IProduct | null>(null);
   const editProductDrawerClose = () => setEditProductDrawerOpen(false);
 
   // create product drawer
@@ -194,7 +194,7 @@ const ProductPage = () => {
     {
       title: <TableTitle title="Action" />,
       key: "action",
-      render: (_, record) => {
+      render: (_, record: IProduct) => {
         return (
           <div className="flex items-center justify-between">
             <Button
@@ -205,7 +205,7 @@ const ProductPage = () => {
                 boxShadow: "none",
               }}
               onClick={() => {
-                setEditProductId(record._id);
+                setEditProduct(record);
                 setEditProductDrawerOpen(true);
               }}
               icon={
@@ -349,7 +349,7 @@ const ProductPage = () => {
         width={600}
         style={{ background: "#FAFAFA" }}
       >
-        <EditProduct productId={editProductId} />
+        {editProduct && <EditProduct product={editProduct} />}
       </Drawer>
     </div>
   );
